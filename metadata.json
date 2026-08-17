@@ -1,0 +1,6 @@
+{
+  "name": "PickleConnect - Nền tảng kết nối Huấn luyện viên Pickleball",
+  "description": "Nền tảng kết nối và quản lý Huấn luyện viên Pickleball chuẩn Quốc tế & DUPR, tích hợp xác thực chứng chỉ, lịch rảnh, đặt lịch học và hệ thống chấm trình độ DUPR.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
