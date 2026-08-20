@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { 
   ShieldCheck, Award, GraduationCap, Users, LogIn, 
   Sparkles, CheckCircle2, Lock, ArrowRight, Star,
-  Calendar, Check, Shield, Search, ChevronRight
+  Calendar, Check, Shield, Search, ChevronRight, UserPlus, KeyRound
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { AuthModal } from './Auth/AuthModal';
 import { UserRole } from '../types';
 
 export const AuthLandingView: React.FC = () => {
@@ -13,6 +14,8 @@ export const AuthLandingView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [customEmail, setCustomEmail] = useState('');
   const [customPassword, setCustomPassword] = useState('');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'login' | 'register' | 'forgot'>('login');
 
   // 1. Admin account
   const adminUser = users.find(u => u.role === 'admin') || users[0];
@@ -29,7 +32,8 @@ export const AuthLandingView: React.FC = () => {
       alert('Vui lòng nhập Email hoặc chọn một tài khoản mẫu bên dưới.');
       return;
     }
-    const matched = users.find(u => u.email.toLowerCase() === customEmail.toLowerCase());
+    const inputEmail = (customEmail || '').trim().toLowerCase();
+    const matched = users.find(u => (u.email || '').toLowerCase() === inputEmail);
     if (matched) {
       login(matched.id);
     } else {
@@ -61,9 +65,29 @@ export const AuthLandingView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 text-xs">
-            <span className="hidden sm:flex items-center gap-1.5 text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-3 py-1.5 rounded-full font-medium">
+            <button
+              onClick={() => {
+                setAuthModalTab('register');
+                setIsAuthModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 text-emerald-300 hover:text-emerald-200 bg-emerald-950/80 border border-emerald-700/60 px-3 py-1.5 rounded-xl font-semibold cursor-pointer transition hover:bg-emerald-900/60"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Đăng Ký Tài Khoản</span>
+            </button>
+            <button
+              onClick={() => {
+                setAuthModalTab('forgot');
+                setIsAuthModalOpen(true);
+              }}
+              className="hidden sm:flex items-center gap-1.5 text-slate-300 hover:text-white bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-xl font-medium cursor-pointer transition hover:bg-slate-700/60"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Quên Mật Khẩu</span>
+            </button>
+            <span className="hidden md:flex items-center gap-1.5 text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-3 py-1.5 rounded-full font-medium">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              Bảo Mật Quyền Riêng Tư & DUPR
+              Bảo Mật DUPR
             </span>
           </div>
         </div>
@@ -161,11 +185,14 @@ export const AuthLandingView: React.FC = () => {
             {/* Quick 1-Click Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[380px] overflow-y-auto pr-1">
               {studentUsers
-                .filter(st => !searchQuery || 
-                  st.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  st.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                  (st.location && st.location.toLowerCase().includes(searchQuery.toLowerCase()))
-                )
+                .filter(st => {
+                  if (!searchQuery) return true;
+                  const q = (searchQuery || '').trim().toLowerCase();
+                  const name = (st.full_name || '').toLowerCase();
+                  const email = (st.email || '').toLowerCase();
+                  const loc = (st.location || '').toLowerCase();
+                  return name.includes(q) || email.includes(q) || loc.includes(q);
+                })
                 .map((student, idx) => {
                   return (
                     <div
@@ -177,7 +204,7 @@ export const AuthLandingView: React.FC = () => {
                         <img
                           src={student.avatar_url}
                           alt={student.full_name}
-                          className="w-10 h-10 rounded-full object-cover ring-1 ring-slate-700 group-hover:ring-emerald-500 shrink-0"
+                          className="w-10 h-10 rounded-full object-cover object-top ring-1 ring-slate-700 group-hover:ring-emerald-500 shrink-0"
                         />
                         <div className="min-w-0">
                           <div className="font-bold text-xs text-white truncate group-hover:text-emerald-300 transition">
@@ -240,12 +267,17 @@ export const AuthLandingView: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
               {coaches
                 .filter(coach => {
+                  if (!searchQuery) return true;
+                  const q = (searchQuery || '').trim().toLowerCase();
                   const cUser = coach.user || users.find(u => u.id === coach.user_id);
-                  const name = cUser?.full_name || '';
-                  return !searchQuery || 
-                    name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    coach.area.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    coach.specialties.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
+                  const name = (cUser?.full_name || '').toLowerCase();
+                  const area = (coach.area || '').toLowerCase();
+                  const specialties = coach.specialties || [];
+                  return (
+                    name.includes(q) ||
+                    area.includes(q) ||
+                    specialties.some(s => (s || '').toLowerCase().includes(q))
+                  );
                 })
                 .map((coach) => {
                   const coachUser = coach.user || users.find(u => u.id === coach.user_id);
@@ -261,7 +293,7 @@ export const AuthLandingView: React.FC = () => {
                         <img
                           src={coachUser.avatar_url}
                           alt={coachUser.full_name}
-                          className="w-12 h-12 rounded-xl object-cover ring-1 ring-slate-700 group-hover:ring-purple-500 shrink-0"
+                          className="w-12 h-12 rounded-xl object-cover object-top ring-1 ring-slate-700 group-hover:ring-purple-500 shrink-0"
                         />
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">
@@ -312,7 +344,7 @@ export const AuthLandingView: React.FC = () => {
                 <img
                   src={adminUser.avatar_url}
                   alt={adminUser.full_name}
-                  className="w-11 h-11 rounded-full object-cover ring-1 ring-blue-500"
+                  className="w-11 h-11 rounded-full object-cover object-top ring-1 ring-blue-500"
                 />
                 <div>
                   <div className="font-bold text-sm text-white">{adminUser.full_name}</div>
@@ -342,6 +374,13 @@ export const AuthLandingView: React.FC = () => {
       <footer className="border-t border-slate-900 py-6 text-center text-xs text-slate-600">
         <p>PickleConnect VN • Nền tảng kết nối Huấn luyện viên Pickleball chuẩn Quốc Tế & DUPR</p>
       </footer>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialTab={authModalTab}
+      />
     </div>
   );
 };

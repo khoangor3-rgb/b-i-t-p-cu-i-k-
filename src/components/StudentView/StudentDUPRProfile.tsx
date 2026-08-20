@@ -37,7 +37,7 @@ export const StudentDUPRProfile: React.FC<{
   ];
 
   const studentName = currentUser?.full_name || 'Học Viên Khách';
-  const avatarUrl = currentUser?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
+  const avatarUrl = currentUser?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80';
   const email = currentUser?.email || 'khach@pickleconnect.vn';
   const createdAt = currentUser?.created_at || '01/2026';
 
@@ -50,7 +50,7 @@ export const StudentDUPRProfile: React.FC<{
             <img
               src={avatarUrl}
               alt={studentName}
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl object-cover ring-4 ring-white/20 shadow-lg"
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl object-cover object-top ring-4 ring-white/20 shadow-lg"
             />
             <div>
               <div className="flex items-center gap-2 mb-1">

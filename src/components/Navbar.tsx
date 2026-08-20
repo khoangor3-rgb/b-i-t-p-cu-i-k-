@@ -2,94 +2,53 @@ import React, { useState } from 'react';
 import { 
   Users, Award, Calendar, CheckCircle2, ShieldAlert, Sparkles, 
   RotateCcw, FileText, ChevronDown, Flame, UserCheck, Search,
-  GraduationCap, Download, User as UserIcon, Shield, LogIn
+  GraduationCap, Download, User as UserIcon, Shield, LogIn, Heart
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { AccountModal } from './AccountModal';
-import { UserRole } from '../types';
+import { NotificationDropdown } from './Notifications/NotificationDropdown';
+import { WishlistModal } from './StudentView/WishlistModal';
+import { AuthModal } from './Auth/AuthModal';
+import { UserRole, CoachProfile } from '../types';
 
 interface NavbarProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
   onOpenDocs: () => void;
   onOpenSelfAssessment?: () => void;
+  onSelectCoach?: (coach: CoachProfile) => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpenDocs, onOpenSelfAssessment }) => {
-  const { currentUser, isLoggedIn, currentRoleMode, switchRole, resetDatabase, users } = useApp();
+export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpenDocs, onOpenSelfAssessment, onSelectCoach }) => {
+  const { currentUser, isLoggedIn, currentRoleMode, switchRole, resetDatabase, users, wishlist } = useApp();
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'login' | 'register' | 'forgot'>('login');
 
   const activeRole: UserRole = currentUser?.role || currentRoleMode || 'student';
+  const myWishlistCount = currentUser ? wishlist.filter(w => w.user_id === currentUser.id).length : 0;
 
   const handleSwitchRoleClick = (role: UserRole) => {
     switchRole(role);
     if (role === 'student') setCurrentTab('home');
-    else if (role === 'coach') setCurrentTab('coach_schedule');
+    else if (role === 'coach') setCurrentTab('coach_home');
     else setCurrentTab('admin_dashboard');
   };
 
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-        {/* Top Enterprise Bar */}
-        <div className="bg-slate-950 text-slate-200 text-xs py-1.5 px-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
-            
-            <div className="flex items-center space-x-2.5 min-w-0">
-              <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md font-semibold flex items-center gap-1.5 text-[11px] shrink-0">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                Chuẩn Quốc Tế & DUPR
-              </span>
-              <span className="hidden md:inline text-slate-300 text-xs truncate">
-                Chính sách <span className="font-semibold text-white">Love Your Lesson</span>: Đổi HLV hoặc hoàn phí 100% nếu chưa hài lòng trong buổi đầu tiên.
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              {onOpenSelfAssessment && (
-                <button
-                  onClick={onOpenSelfAssessment}
-                  className="inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-[11px] sm:text-xs px-3 py-1 rounded-lg transition cursor-pointer shadow-xs"
-                  title="Thẩm định trình độ DUPR 6 kỹ năng tiêu chuẩn"
-                >
-                  <Sparkles className="w-3 h-3 text-slate-950 fill-slate-950" />
-                  <span>Đánh Giá DUPR</span>
-                </button>
-              )}
-
-              <a
-                href="/pickleconnect-standalone.html"
-                download="PickleConnect_Enterprise.html"
-                className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-[11px] sm:text-xs px-2.5 py-1 rounded-lg transition cursor-pointer"
-                title="Tải về bản HTML độc lập hoàn chỉnh"
-              >
-                <Download className="w-3 h-3 text-slate-300" />
-                <span>Xuất File HTML</span>
-              </a>
-
-              <button
-                onClick={onOpenDocs}
-                className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-[11px] sm:text-xs px-2.5 py-1 rounded-lg transition cursor-pointer"
-              >
-                <FileText className="w-3 h-3 text-emerald-400" />
-                <span className="hidden sm:inline">Tài Liệu Đồ Án & Báo Cáo</span>
-                <span className="sm:hidden">Tài Liệu</span>
-              </button>
-            </div>
-
-          </div>
-        </div>
-
         {/* Main Navbar Header */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             
             {/* Logo & Brand Identity */}
             <div 
-              className="flex items-center space-x-3 cursor-pointer group" 
+              className="flex items-center space-x-3 cursor-pointer group shrink-0" 
               onClick={() => {
                 if (activeRole === 'student') setCurrentTab('home');
-                else if (activeRole === 'coach') setCurrentTab('coach_schedule');
+                else if (activeRole === 'coach') setCurrentTab('coach_home');
                 else setCurrentTab('admin_dashboard');
               }}
             >
@@ -98,59 +57,59 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold text-lg text-slate-900 tracking-tight">Pickle<span className="text-emerald-600">Connect</span></span>
+                  <span className="font-extrabold text-lg text-slate-900 tracking-tight whitespace-nowrap">Pickle<span className="text-emerald-600">Connect</span></span>
                   <span className="bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold px-1.5 py-0.5 rounded">VN</span>
                 </div>
-                <p className="text-[11px] text-slate-500 hidden sm:block font-medium">Hệ Thống Huấn Luyện Viên & Lớp Học Chuyên Nghiệp</p>
+                <p className="text-[11px] text-slate-500 hidden 2xl:block font-medium truncate max-w-[220px]">Hệ Thống Huấn Luyện Viên & Lớp</p>
               </div>
             </div>
 
             {/* Desktop Clean Navigation Tabs (No Clunky Parentheses) */}
-            <nav className="hidden md:flex items-center space-x-1">
+            <nav className="hidden lg:flex items-center space-x-1 shrink-0 overflow-x-auto no-scrollbar">
               {activeRole === 'student' && (
                 <>
                   <button
                     onClick={() => setCurrentTab('home')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                       currentTab === 'home' 
                         ? 'bg-slate-900 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <Search className="w-4 h-4" />
-                    <span>Tìm Huấn Luyện Viên</span>
+                    <Search className="w-4 h-4 text-emerald-500" />
+                    <span>Tìm HLV</span>
                   </button>
                   <button
                     onClick={() => setCurrentTab('classes')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                       currentTab === 'classes' 
                         ? 'bg-slate-900 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <GraduationCap className="w-4 h-4" />
-                    <span>Khóa Học & Lớp Nhóm</span>
+                    <GraduationCap className="w-4 h-4 text-purple-500" />
+                    <span>Lớp Học & Khóa</span>
                   </button>
                   <button
                     onClick={() => setCurrentTab('bookings')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                       currentTab === 'bookings' 
                         ? 'bg-slate-900 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <Calendar className="w-4 h-4" />
-                    <span>Lịch Học Của Tôi</span>
+                    <Calendar className="w-4 h-4 text-blue-500" />
+                    <span>Lịch Của Tôi</span>
                   </button>
                   <button
                     onClick={() => setCurrentTab('dupr')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                       currentTab === 'dupr' 
                         ? 'bg-slate-900 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <Award className="w-4 h-4" />
+                    <Award className="w-4 h-4 text-amber-500" />
                     <span>Hồ Sơ DUPR</span>
                   </button>
                 </>
@@ -159,48 +118,70 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
               {activeRole === 'coach' && (
                 <>
                   <button
-                    onClick={() => setCurrentTab('coach_classes')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
-                      currentTab === 'coach_classes' 
+                    onClick={() => setCurrentTab('coach_home')}
+                    className={`px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                      currentTab === 'coach_home' 
                         ? 'bg-slate-900 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <GraduationCap className="w-4 h-4" />
-                    <span>Quản Lý Lớp Học</span>
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Tổng Quan</span>
                   </button>
                   <button
                     onClick={() => setCurrentTab('coach_schedule')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                    className={`px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                       currentTab === 'coach_schedule' 
                         ? 'bg-slate-900 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <Calendar className="w-4 h-4" />
-                    <span>Lịch Dạy & Đặt Chỗ</span>
+                    <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                    <span>Lịch Dạy</span>
+                  </button>
+                  <button
+                    onClick={() => setCurrentTab('coach_students')}
+                    className={`px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                      currentTab === 'coach_students' 
+                        ? 'bg-slate-900 text-white shadow-xs' 
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                  >
+                    <GraduationCap className="w-3.5 h-3.5 text-purple-500" />
+                    <span>Học Viên</span>
+                  </button>
+                  <button
+                    onClick={() => setCurrentTab('coach_earnings')}
+                    className={`px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                      currentTab === 'coach_earnings' 
+                        ? 'bg-slate-900 text-white shadow-xs' 
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                    <span>Thu Nhập</span>
                   </button>
                   <button
                     onClick={() => setCurrentTab('coach_profile')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                    className={`px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                       currentTab === 'coach_profile' 
                         ? 'bg-slate-900 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <UserCheck className="w-4 h-4" />
-                    <span>Hồ Sơ Huấn Luyện</span>
+                    <UserCheck className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Hồ Sơ HLV</span>
                   </button>
                   <button
                     onClick={() => setCurrentTab('coach_stats')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                    className={`px-2.5 xl:px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                       currentTab === 'coach_stats' 
                         ? 'bg-slate-900 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <Award className="w-4 h-4" />
-                    <span>Hiệu Suất & Đánh Giá</span>
+                    <Award className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Đánh Giá</span>
                   </button>
                 </>
               )}
@@ -209,55 +190,78 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
                 <>
                   <button
                     onClick={() => setCurrentTab('admin_dashboard')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                       currentTab === 'admin_dashboard' 
                         ? 'bg-purple-800 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <Flame className="w-4 h-4" />
-                    <span>Bảng Chỉ Số Doanh Thu</span>
+                    <Flame className="w-4 h-4 text-amber-400" />
+                    <span>Doanh Thu</span>
                   </button>
                   <button
                     onClick={() => setCurrentTab('admin_classes')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                       currentTab === 'admin_classes' 
                         ? 'bg-purple-800 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <GraduationCap className="w-4 h-4" />
-                    <span>Điều Phối Lớp Học</span>
+                    <GraduationCap className="w-4 h-4 text-purple-400" />
+                    <span>Điều Phối Lớp</span>
                   </button>
                   <button
                     onClick={() => setCurrentTab('admin_verify')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                       currentTab === 'admin_verify' 
                         ? 'bg-purple-800 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <ShieldAlert className="w-4 h-4" />
-                    <span>Xác Thực Huấn Luyện Viên</span>
+                    <ShieldAlert className="w-4 h-4 text-emerald-400" />
+                    <span>Duyệt HLV</span>
                   </button>
                   <button
                     onClick={() => setCurrentTab('admin_users')}
-                    className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                       currentTab === 'admin_users' 
                         ? 'bg-purple-800 text-white shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    <Users className="w-4 h-4" />
-                    <span>Cơ Sở Dữ Liệu Thành Viên</span>
+                    <Users className="w-4 h-4 text-blue-400" />
+                    <span>Thành Viên</span>
                   </button>
                 </>
               )}
             </nav>
 
-            {/* Quick Segmented Role Switcher + User Profile Pill */}
-            <div className="flex items-center space-x-3">
+            {/* Quick Segmented Role Switcher + User Profile Pill + Notifications + Wishlist */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
               
+              {/* Wishlist Button (for students) */}
+              {activeRole === 'student' && (
+                <button
+                  id="btn_navbar_wishlist"
+                  onClick={() => setIsWishlistModalOpen(true)}
+                  className="relative p-2 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors flex items-center justify-center focus:outline-none"
+                  title="HLV Yêu thích"
+                >
+                  <Heart className={`w-5 h-5 ${myWishlistCount > 0 ? 'text-rose-500 fill-rose-500/20' : ''}`} />
+                  {myWishlistCount > 0 && (
+                    <span 
+                      id="badge_wishlist_count"
+                      className="absolute top-0.5 right-0.5 min-w-[17px] h-[17px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-xs"
+                    >
+                      {myWishlistCount}
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {/* Notification Center Dropdown */}
+              {isLoggedIn && <NotificationDropdown />}
+
               {/* Segmented Role Switcher Controller (Clean Enterprise Style) */}
               <div className="hidden xl:flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 text-xs font-semibold">
                 <button
@@ -311,7 +315,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
                     <img 
                       src={currentUser.avatar_url} 
                       alt={currentUser.full_name} 
-                      className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-200 shadow-2xs group-hover:scale-105 transition"
+                      className="w-8 h-8 rounded-lg object-cover object-top ring-1 ring-slate-200 shadow-2xs group-hover:scale-105 transition"
                     />
                     <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
                   </div>
@@ -336,7 +340,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
               ) : (
                 /* When Logged Out: Clean Enterprise Login Button */
                 <button
-                  onClick={() => setIsAccountModalOpen(true)}
+                  onClick={() => {
+                    setAuthModalTab('login');
+                    setIsAuthModalOpen(true);
+                  }}
                   className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-sm transition-all duration-150 cursor-pointer font-semibold text-xs"
                   title="Đăng nhập tài khoản"
                 >
@@ -394,13 +401,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
         {activeRole === 'coach' && (
           <>
             <button 
-              onClick={() => setCurrentTab('coach_classes')} 
+              onClick={() => setCurrentTab('coach_home')} 
               className={`flex-1 flex flex-col items-center justify-center py-1 rounded-lg text-[11px] font-semibold transition ${
-                currentTab === 'coach_classes' ? 'text-emerald-700 bg-emerald-50' : 'text-slate-500'
+                currentTab === 'coach_home' ? 'text-emerald-700 bg-emerald-50' : 'text-slate-500'
               }`}
             >
-              <GraduationCap className="w-4 h-4 mb-0.5" />
-              <span>Lớp Học</span>
+              <Sparkles className="w-4 h-4 mb-0.5" />
+              <span>Tổng Quan</span>
             </button>
             <button 
               onClick={() => setCurrentTab('coach_schedule')} 
@@ -412,13 +419,22 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
               <span>Lịch Dạy</span>
             </button>
             <button 
-              onClick={() => setCurrentTab('coach_profile')} 
+              onClick={() => setCurrentTab('coach_students')} 
               className={`flex-1 flex flex-col items-center justify-center py-1 rounded-lg text-[11px] font-semibold transition ${
-                currentTab === 'coach_profile' ? 'text-emerald-700 bg-emerald-50' : 'text-slate-500'
+                currentTab === 'coach_students' ? 'text-emerald-700 bg-emerald-50' : 'text-slate-500'
               }`}
             >
-              <UserCheck className="w-4 h-4 mb-0.5" />
-              <span>Hồ Sơ HLV</span>
+              <GraduationCap className="w-4 h-4 mb-0.5" />
+              <span>Học Viên</span>
+            </button>
+            <button 
+              onClick={() => setCurrentTab('coach_earnings')} 
+              className={`flex-1 flex flex-col items-center justify-center py-1 rounded-lg text-[11px] font-semibold transition ${
+                currentTab === 'coach_earnings' ? 'text-emerald-700 bg-emerald-50' : 'text-slate-500'
+              }`}
+            >
+              <CheckCircle2 className="w-4 h-4 mb-0.5" />
+              <span>Thu Nhập</span>
             </button>
             <button 
               onClick={() => setIsAccountModalOpen(true)} 
@@ -475,6 +491,29 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab, onOpe
         isOpen={isAccountModalOpen}
         onClose={() => setIsAccountModalOpen(false)}
         onSelectRoleTab={(tab) => setCurrentTab(tab)}
+      />
+
+      {/* Wishlist Modal */}
+      <WishlistModal
+        isOpen={isWishlistModalOpen}
+        onClose={() => setIsWishlistModalOpen(false)}
+        onSelectCoach={(coach) => {
+          if (onSelectCoach) {
+            onSelectCoach(coach);
+          }
+        }}
+        onBookCoach={(coach) => {
+          if (onSelectCoach) {
+            onSelectCoach(coach);
+          }
+        }}
+      />
+
+      {/* Auth Modal (Login / Register / Forgot Password) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialTab={authModalTab}
       />
     </>
   );

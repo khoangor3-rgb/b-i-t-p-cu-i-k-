@@ -1,74 +1,104 @@
-import { User, CoachProfile, AvailabilitySlot, Booking, Review, SkillRating, TestCaseItem, CoachClass } from '../types';
+import { 
+  User, CoachProfile, AvailabilitySlot, Booking, Review, 
+  SkillRating, TestCaseItem, CoachClass, Payment, PayoutHistory,
+  AdminUser, AdminActionLog, CoachAvailabilityRule, CancellationPolicyRule,
+  SessionReminder, UserReport, SessionRecap, WaitlistEntry, SkillLevel
+} from '../types';
 
 // ==========================================
 // 1. DANH SÁCH 50+ HỌC VIÊN & HLV & ADMIN
 // ==========================================
 
 const STUDENT_NAMES = [
-  { name: 'Trần Thị Lan', email: 'lan.tran@gmail.com', phone: '0912345678', loc: 'Bình Thạnh, TP.HCM', dupr: 3.2, img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150' },
-  { name: 'Lê Hoàng Minh', email: 'minh.le@gmail.com', phone: '0987654321', loc: 'Cầu Giấy, Hà Nội', dupr: 2.5, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
-  { name: 'Nguyễn Văn Hùng', email: 'hung.nguyen@gmail.com', phone: '0903112233', loc: 'Quận 7, TP.HCM', dupr: 3.8, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' },
-  { name: 'Phạm Thu Trang', email: 'trang.pham@gmail.com', phone: '0918223344', loc: 'Tây Hồ, Hà Nội', dupr: 3.0, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
-  { name: 'Võ Minh Phúc', email: 'phuc.vo@gmail.com', phone: '0933445566', loc: 'Hải Châu, Đà Nẵng', dupr: 3.5, img: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150' },
-  { name: 'Đỗ Thanh Thảo', email: 'thao.do@gmail.com', phone: '0977889900', loc: 'Quận 2, TP.HCM', dupr: 2.8, img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150' },
-  { name: 'Bùi Anh Tuấn', email: 'tuan.bui@gmail.com', phone: '0966112233', loc: 'Ba Đình, Hà Nội', dupr: 4.1, img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150' },
-  { name: 'Hoàng Thùy Linh', email: 'linh.hoang@gmail.com', phone: '0909556677', loc: 'Thủ Đức, TP.HCM', dupr: 3.1, img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150' },
-  { name: 'Ngô Việt Đức', email: 'duc.ngo@gmail.com', phone: '0938114477', loc: 'Sơn Trà, Đà Nẵng', dupr: 2.9, img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150' },
-  { name: 'Dương Hải Đăng', email: 'dang.duong@gmail.com', phone: '0944332211', loc: 'Phú Nhuận, TP.HCM', dupr: 3.6, img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150' },
-  { name: 'Trịnh Thảo Vy', email: 'vy.trinh@gmail.com', phone: '0988112233', loc: 'Quận 1, TP.HCM', dupr: 2.7, img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150' },
-  { name: 'Lý Quốc Long', email: 'long.ly@gmail.com', phone: '0911223344', loc: 'Nam Từ Liêm, Hà Nội', dupr: 3.4, img: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150' },
-  { name: 'Đặng Thái Sơn', email: 'son.dang@gmail.com', phone: '0937665544', loc: 'Tân Bình, TP.HCM', dupr: 3.7, img: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150' },
-  { name: 'Mai Hải Yến', email: 'yen.mai@gmail.com', phone: '0965332211', loc: 'Thanh Xuân, Hà Nội', dupr: 2.6, img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150' },
-  { name: 'Phan Minh Quân', email: 'quan.phan@gmail.com', phone: '0944118899', loc: 'Ngũ Hành Sơn, Đà Nẵng', dupr: 4.0, img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150' },
-  { name: 'Lê Kim Ngân', email: 'ngan.le@gmail.com', phone: '0977223344', loc: 'Quận 7, TP.HCM', dupr: 3.3, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
-  { name: 'Vũ Đức Tâm', email: 'tam.vu@gmail.com', phone: '0908776655', loc: 'Hoàn Kiếm, Hà Nội', dupr: 3.9, img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150' },
-  { name: 'Huỳnh Đăng Khoa', email: 'khoa.huynh@gmail.com', phone: '0919334455', loc: 'Quận 3, TP.HCM', dupr: 2.9, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
-  { name: 'Tạ Huy Hoàng', email: 'hoang.ta@gmail.com', phone: '0981223344', loc: 'Hà Đông, Hà Nội', dupr: 3.2, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' },
-  { name: 'Cao Khánh Ly', email: 'ly.cao@gmail.com', phone: '0934112233', loc: 'Quận 2, TP.HCM', dupr: 3.0, img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150' },
-  { name: 'Đoàn Phương Nam', email: 'nam.doan@gmail.com', phone: '0962445566', loc: 'Hải Châu, Đà Nẵng', dupr: 3.6, img: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150' },
-  { name: 'Lương Quốc Bảo', email: 'bao.luong@gmail.com', phone: '0943556677', loc: 'Thủ Đức, TP.HCM', dupr: 3.4, img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150' },
-  { name: 'Chu Thu Phương', email: 'phuong.chu@gmail.com', phone: '0978990011', loc: 'Cầu Giấy, Hà Nội', dupr: 2.8, img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150' },
-  { name: 'Đinh Thành Duy', email: 'duy.dinh@gmail.com', phone: '0901223344', loc: 'Quận 10, TP.HCM', dupr: 4.2, img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150' },
-  { name: 'Nguyễn Thu Hương', email: 'huong.nguyen@gmail.com', phone: '0915667788', loc: 'Long Biên, Hà Nội', dupr: 3.1, img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150' },
-  { name: 'Phạm Đức Trọng', email: 'trong.pham@gmail.com', phone: '0983114455', loc: 'Gò Vấp, TP.HCM', dupr: 3.5, img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150' },
-  { name: 'Lê Ngọc Ánh', email: 'anh.le@gmail.com', phone: '0936225588', loc: 'Thanh Khê, Đà Nẵng', dupr: 2.9, img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150' },
-  { name: 'Trần Tuấn Vũ', email: 'vu.tran@gmail.com', phone: '0969113355', loc: 'Tây Hồ, Hà Nội', dupr: 3.8, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
-  { name: 'Vũ Hương Giang', email: 'giang.vu@gmail.com', phone: '0948332211', loc: 'Quận 4, TP.HCM', dupr: 2.7, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
-  { name: 'Bùi Thái Bình', email: 'binh.bui@gmail.com', phone: '0971556677', loc: 'Thủ Dầu Một, Bình Dương', dupr: 3.3, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' },
-  { name: 'Hoàng Trung Kiên', email: 'kien.hoang@gmail.com', phone: '0904112299', loc: 'Đống Đa, Hà Nội', dupr: 3.6, img: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150' },
-  { name: 'Nguyễn Như Mai', email: 'mai.nguyen@gmail.com', phone: '0916335577', loc: 'Quận 7, TP.HCM', dupr: 3.0, img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150' },
-  { name: 'Phan Tùng Lâm', email: 'lam.phan@gmail.com', phone: '0984221100', loc: 'Ba Đình, Hà Nội', dupr: 3.7, img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150' },
-  { name: 'Đặng Thùy Dung', email: 'dung.dang@gmail.com', phone: '0932446688', loc: 'Sơn Trà, Đà Nẵng', dupr: 2.6, img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150' },
-  { name: 'Võ Quốc Huy', email: 'huy.vo@gmail.com', phone: '0963114466', loc: 'Bình Thạnh, TP.HCM', dupr: 3.9, img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150' },
-  { name: 'Lê Uyên Nhi', email: 'nhi.le@gmail.com', phone: '0941557799', loc: 'Tây Hồ, Hà Nội', dupr: 3.2, img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150' },
-  { name: 'Trương Hải Đăng', email: 'dang.truong@gmail.com', phone: '0975331199', loc: 'Quận 2, TP.HCM', dupr: 4.1, img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150' },
-  { name: 'Dương Mỹ Hạnh', email: 'hanh.duong@gmail.com', phone: '0907224466', loc: 'Hải Châu, Đà Nẵng', dupr: 2.9, img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150' },
-  { name: 'Lý Gia Phát', email: 'phat.ly@gmail.com', phone: '0913889900', loc: 'Quận 1, TP.HCM', dupr: 3.5, img: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150' },
-  { name: 'Tô Như Quỳnh', email: 'quynh.to@gmail.com', phone: '0986442200', loc: 'Cầu Giấy, Hà Nội', dupr: 3.4, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
-  { name: 'Mai Thành Tín', email: 'tin.mai@gmail.com', phone: '0939113377', loc: 'Tân Phú, TP.HCM', dupr: 3.1, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
-  { name: 'Nguyễn Thị Kim Loan', email: 'loan.nguyen@gmail.com', phone: '0968224488', loc: 'Hoàng Mai, Hà Nội', dupr: 2.5, img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150' },
-  { name: 'Phạm Tiến Thành', email: 'thanh.pham@gmail.com', phone: '0942558811', loc: 'Quận 7, TP.HCM', dupr: 3.8, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' },
-  { name: 'Vũ Hoàng Oanh', email: 'oanh.vu@gmail.com', phone: '0979336600', loc: 'Ngũ Hành Sơn, Đà Nẵng', dupr: 3.0, img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150' },
-  { name: 'Bùi Tuấn Việt', email: 'viet.bui@gmail.com', phone: '0902114488', loc: 'Thủ Đức, TP.HCM', dupr: 3.6, img: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150' },
-  { name: 'Đỗ Kiều Diễm', email: 'diem.do@gmail.com', phone: '0914668822', loc: 'Ba Đình, Hà Nội', dupr: 2.8, img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150' },
-  { name: 'Hồ Trọng Nghĩa', email: 'nghia.ho@gmail.com', phone: '0985227744', loc: 'Quận 5, TP.HCM', dupr: 3.3, img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150' },
-  { name: 'Trần Bích Trâm', email: 'tram.tran@gmail.com', phone: '0931448800', loc: 'Tây Hồ, Hà Nội', dupr: 3.2, img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150' },
-  { name: 'Lê Minh Hiếu', email: 'hieu.le@gmail.com', phone: '0967339911', loc: 'Hải Châu, Đà Nẵng', dupr: 3.7, img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150' },
-  { name: 'Nguyễn Bảo Ngọc', email: 'ngoc.bao@gmail.com', phone: '0949115533', loc: 'Quận 2, TP.HCM', dupr: 3.1, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+  { name: 'Trần Thị Lan', email: 'lan.tran@gmail.com', phone: '0912345678', loc: 'Bình Thạnh, TP.HCM', dupr: 3.2, img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Lê Hoàng Minh', email: 'minh.le@gmail.com', phone: '0987654321', loc: 'Cầu Giấy, Hà Nội', dupr: 2.5, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Nguyễn Văn Hùng', email: 'hung.nguyen@gmail.com', phone: '0903112233', loc: 'Quận 7, TP.HCM', dupr: 3.8, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Phạm Thu Trang', email: 'trang.pham@gmail.com', phone: '0918223344', loc: 'Tây Hồ, Hà Nội', dupr: 3.0, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Võ Minh Phúc', email: 'phuc.vo@gmail.com', phone: '0933445566', loc: 'Hải Châu, Đà Nẵng', dupr: 3.5, img: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Đỗ Thanh Thảo', email: 'thao.do@gmail.com', phone: '0977889900', loc: 'Quận 2, TP.HCM', dupr: 2.8, img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Bùi Anh Tuấn', email: 'tuan.bui@gmail.com', phone: '0966112233', loc: 'Ba Đình, Hà Nội', dupr: 4.1, img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Hoàng Thùy Linh', email: 'linh.hoang@gmail.com', phone: '0909556677', loc: 'Thủ Đức, TP.HCM', dupr: 3.1, img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Ngô Việt Đức', email: 'duc.ngo@gmail.com', phone: '0938114477', loc: 'Sơn Trà, Đà Nẵng', dupr: 2.9, img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Dương Hải Đăng', email: 'dang.duong@gmail.com', phone: '0944332211', loc: 'Phú Nhuận, TP.HCM', dupr: 3.6, img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Trịnh Thảo Vy', email: 'vy.trinh@gmail.com', phone: '0988112233', loc: 'Quận 1, TP.HCM', dupr: 2.7, img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Lý Quốc Long', email: 'long.ly@gmail.com', phone: '0911223344', loc: 'Nam Từ Liêm, Hà Nội', dupr: 3.4, img: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Đặng Thái Sơn', email: 'son.dang@gmail.com', phone: '0937665544', loc: 'Tân Bình, TP.HCM', dupr: 3.7, img: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Mai Hải Yến', email: 'yen.mai@gmail.com', phone: '0965332211', loc: 'Thanh Xuân, Hà Nội', dupr: 2.6, img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Phan Minh Quân', email: 'quan.phan@gmail.com', phone: '0944118899', loc: 'Ngũ Hành Sơn, Đà Nẵng', dupr: 4.0, img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Lê Kim Ngân', email: 'ngan.le@gmail.com', phone: '0977223344', loc: 'Quận 7, TP.HCM', dupr: 3.3, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Vũ Đức Tâm', email: 'tam.vu@gmail.com', phone: '0908776655', loc: 'Hoàn Kiếm, Hà Nội', dupr: 3.9, img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Huỳnh Đăng Khoa', email: 'khoa.huynh@gmail.com', phone: '0919334455', loc: 'Quận 3, TP.HCM', dupr: 2.9, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Tạ Huy Hoàng', email: 'hoang.ta@gmail.com', phone: '0981223344', loc: 'Hà Đông, Hà Nội', dupr: 3.2, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Cao Khánh Ly', email: 'ly.cao@gmail.com', phone: '0934112233', loc: 'Quận 2, TP.HCM', dupr: 3.0, img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Đoàn Phương Nam', email: 'nam.doan@gmail.com', phone: '0962445566', loc: 'Hải Châu, Đà Nẵng', dupr: 3.6, img: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Lương Quốc Bảo', email: 'bao.luong@gmail.com', phone: '0943556677', loc: 'Thủ Đức, TP.HCM', dupr: 3.4, img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Chu Thu Phương', email: 'phuong.chu@gmail.com', phone: '0978990011', loc: 'Cầu Giấy, Hà Nội', dupr: 2.8, img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Đinh Thành Duy', email: 'duy.dinh@gmail.com', phone: '0901223344', loc: 'Quận 10, TP.HCM', dupr: 4.2, img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Nguyễn Thu Hương', email: 'huong.nguyen@gmail.com', phone: '0915667788', loc: 'Long Biên, Hà Nội', dupr: 3.1, img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Phạm Đức Trọng', email: 'trong.pham@gmail.com', phone: '0983114455', loc: 'Gò Vấp, TP.HCM', dupr: 3.5, img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Lê Ngọc Ánh', email: 'anh.le@gmail.com', phone: '0936225588', loc: 'Thanh Khê, Đà Nẵng', dupr: 2.9, img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Trần Tuấn Vũ', email: 'vu.tran@gmail.com', phone: '0969113355', loc: 'Tây Hồ, Hà Nội', dupr: 3.8, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Vũ Hương Giang', email: 'giang.vu@gmail.com', phone: '0948332211', loc: 'Quận 4, TP.HCM', dupr: 2.7, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Bùi Thái Bình', email: 'binh.bui@gmail.com', phone: '0971556677', loc: 'Thủ Dầu Một, Bình Dương', dupr: 3.3, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Hoàng Trung Kiên', email: 'kien.hoang@gmail.com', phone: '0904112299', loc: 'Đống Đa, Hà Nội', dupr: 3.6, img: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Nguyễn Như Mai', email: 'mai.nguyen@gmail.com', phone: '0916335577', loc: 'Quận 7, TP.HCM', dupr: 3.0, img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Phan Tùng Lâm', email: 'lam.phan@gmail.com', phone: '0984221100', loc: 'Ba Đình, Hà Nội', dupr: 3.7, img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Đặng Thùy Dung', email: 'dung.dang@gmail.com', phone: '0932446688', loc: 'Sơn Trà, Đà Nẵng', dupr: 2.6, img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Võ Quốc Huy', email: 'huy.vo@gmail.com', phone: '0963114466', loc: 'Bình Thạnh, TP.HCM', dupr: 3.9, img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Lê Uyên Nhi', email: 'nhi.le@gmail.com', phone: '0941557799', loc: 'Tây Hồ, Hà Nội', dupr: 3.2, img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Trương Hải Đăng', email: 'dang.truong@gmail.com', phone: '0975331199', loc: 'Quận 2, TP.HCM', dupr: 4.1, img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Dương Mỹ Hạnh', email: 'hanh.duong@gmail.com', phone: '0907224466', loc: 'Hải Châu, Đà Nẵng', dupr: 2.9, img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Lý Gia Phát', email: 'phat.ly@gmail.com', phone: '0913889900', loc: 'Quận 1, TP.HCM', dupr: 3.5, img: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Tô Như Quỳnh', email: 'quynh.to@gmail.com', phone: '0986442200', loc: 'Cầu Giấy, Hà Nội', dupr: 3.4, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Mai Thành Tín', email: 'tin.mai@gmail.com', phone: '0939113377', loc: 'Tân Phú, TP.HCM', dupr: 3.1, img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Nguyễn Thị Kim Loan', email: 'loan.nguyen@gmail.com', phone: '0968224488', loc: 'Hoàng Mai, Hà Nội', dupr: 2.5, img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Phạm Tiến Thành', email: 'thanh.pham@gmail.com', phone: '0942558811', loc: 'Quận 7, TP.HCM', dupr: 3.8, img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Vũ Hoàng Oanh', email: 'oanh.vu@gmail.com', phone: '0979336600', loc: 'Ngũ Hành Sơn, Đà Nẵng', dupr: 3.0, img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Bùi Tuấn Việt', email: 'viet.bui@gmail.com', phone: '0902114488', loc: 'Thủ Đức, TP.HCM', dupr: 3.6, img: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Đỗ Kiều Diễm', email: 'diem.do@gmail.com', phone: '0914668822', loc: 'Ba Đình, Hà Nội', dupr: 2.8, img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Hồ Trọng Nghĩa', email: 'nghia.ho@gmail.com', phone: '0985227744', loc: 'Quận 5, TP.HCM', dupr: 3.3, img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Trần Bích Trâm', email: 'tram.tran@gmail.com', phone: '0931448800', loc: 'Tây Hồ, Hà Nội', dupr: 3.2, img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Lê Minh Hiếu', email: 'hieu.le@gmail.com', phone: '0967339911', loc: 'Hải Châu, Đà Nẵng', dupr: 3.7, img: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
+  { name: 'Nguyễn Bảo Ngọc', email: 'ngoc.bao@gmail.com', phone: '0949115533', loc: 'Quận 2, TP.HCM', dupr: 3.1, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80' },
 ];
 
 export const INITIAL_USERS: User[] = [
-  // 1. ADMIN
+  // 1. ADMINS (RBAC)
   {
     id: 'user_admin_1',
-    full_name: 'Nguyễn Hải Long (Admin Lead)',
+    full_name: 'Nguyễn Hải Long (Super Admin Lead)',
     email: 'long.admin@pickleconnect.vn',
     phone: '0908123456',
-    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     role: 'admin',
+    admin_role: 'super_admin',
     created_at: '2026-08-01',
     status: 'active',
     location: 'Quận 1, TP.HCM'
+  },
+  {
+    id: 'user_admin_support',
+    full_name: 'Trần Minh Support (Support Admin)',
+    email: 'support.admin@pickleconnect.vn',
+    phone: '0908998877',
+    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    role: 'admin',
+    admin_role: 'support_admin',
+    created_at: '2026-08-05',
+    status: 'active',
+    location: 'Cầu Giấy, Hà Nội'
+  },
+  {
+    id: 'user_admin_finance',
+    full_name: 'Phạm Thu Finance (Finance Admin)',
+    email: 'finance.admin@pickleconnect.vn',
+    phone: '0918776655',
+    avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    role: 'admin',
+    admin_role: 'finance_admin',
+    created_at: '2026-08-05',
+    status: 'active',
+    location: 'Quận 3, TP.HCM'
   },
   
   // 2. 10 HUẤN LUYỆN VIÊN (COACHES)
@@ -77,7 +107,7 @@ export const INITIAL_USERS: User[] = [
     full_name: 'Nguyễn Đăng Khoa (Coach Khoa)',
     email: 'khoa.coach@pickleconnect.vn',
     phone: '0933112233',
-    avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+    avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     role: 'coach',
     created_at: '2026-08-02',
     status: 'active',
@@ -88,7 +118,7 @@ export const INITIAL_USERS: User[] = [
     full_name: 'Phạm Tuấn Anh (IPTPA Coach)',
     email: 'tuananh.pickle@gmail.com',
     phone: '0909887766',
-    avatar_url: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',
+    avatar_url: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     role: 'coach',
     created_at: '2026-08-03',
     status: 'active',
@@ -99,7 +129,7 @@ export const INITIAL_USERS: User[] = [
     full_name: 'Vũ Thu Hà (PPR Pro Coach)',
     email: 'thuha.pickleball@gmail.com',
     phone: '0977443322',
-    avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+    avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     role: 'coach',
     created_at: '2026-08-04',
     status: 'active',
@@ -110,7 +140,7 @@ export const INITIAL_USERS: User[] = [
     full_name: 'Lê Hoàng Nam (VPA Master Coach)',
     email: 'hoangnam.vpa@gmail.com',
     phone: '0912883311',
-    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     role: 'coach',
     created_at: '2026-08-05',
     status: 'active',
@@ -121,7 +151,7 @@ export const INITIAL_USERS: User[] = [
     full_name: 'Đặng Minh Quân (IPTPA Level 2)',
     email: 'minhquan.pickle@gmail.com',
     phone: '0938445566',
-    avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+    avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     role: 'coach',
     created_at: '2026-08-06',
     status: 'active',
@@ -132,7 +162,7 @@ export const INITIAL_USERS: User[] = [
     full_name: 'Hoàng Mai Quỳnh (PPR Certified)',
     email: 'maiquynh.pickle@gmail.com',
     phone: '0988771122',
-    avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
+    avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     role: 'coach',
     created_at: '2026-08-07',
     status: 'active',
@@ -143,7 +173,7 @@ export const INITIAL_USERS: User[] = [
     full_name: 'Trịnh Công Vinh (USPTA Pickleball)',
     email: 'congvinh.uspta@gmail.com',
     phone: '0903998877',
-    avatar_url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150',
+    avatar_url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     role: 'coach',
     created_at: '2026-08-08',
     status: 'active',
@@ -154,7 +184,7 @@ export const INITIAL_USERS: User[] = [
     full_name: 'Phan Bảo Long (Master DUPR Evaluator)',
     email: 'baolong.dupr@gmail.com',
     phone: '0944223311',
-    avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150',
+    avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     role: 'coach',
     created_at: '2026-08-09',
     status: 'active',
@@ -165,7 +195,7 @@ export const INITIAL_USERS: User[] = [
     full_name: 'Đỗ Bích Ngọc (PPR Associate)',
     email: 'bichngoc.pickle@gmail.com',
     phone: '0971223344',
-    avatar_url: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150',
+    avatar_url: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     role: 'coach',
     created_at: '2026-08-10',
     status: 'active',
@@ -176,7 +206,7 @@ export const INITIAL_USERS: User[] = [
     full_name: 'Đoàn Quang Dũng (HLV Chờ duyệt)',
     email: 'quangdung.pb@gmail.com',
     phone: '0944556677',
-    avatar_url: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150',
+    avatar_url: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     role: 'coach',
     created_at: '2026-08-16',
     status: 'active',
@@ -184,18 +214,25 @@ export const INITIAL_USERS: User[] = [
   },
 
   // 3. 50 HỌC VIÊN (STUDENTS)
-  ...STUDENT_NAMES.map((s, idx) => ({
-    id: `user_student_${idx + 1}`,
-    full_name: s.name,
-    email: s.email,
-    phone: s.phone,
-    avatar_url: s.img,
-    role: 'student' as const,
-    created_at: `2026-08-${String((idx % 15) + 1).padStart(2, '0')}`,
-    status: 'active' as const,
-    dupr_rating: s.dupr,
-    location: s.loc
-  }))
+  ...STUDENT_NAMES.map((s, idx) => {
+    let skillLevel: SkillLevel = 'intermediate';
+    if (s.dupr < 2.9) skillLevel = 'beginner';
+    else if (s.dupr > 3.6) skillLevel = 'competitive';
+
+    return {
+      id: `user_student_${idx + 1}`,
+      full_name: s.name,
+      email: s.email,
+      phone: s.phone,
+      avatar_url: s.img,
+      role: 'student' as const,
+      created_at: `2026-08-${String((idx % 15) + 1).padStart(2, '0')}`,
+      status: 'active' as const,
+      dupr_rating: s.dupr,
+      skill_level: skillLevel,
+      location: s.loc
+    };
+  })
 ];
 
 // ==========================================
@@ -243,12 +280,19 @@ export const INITIAL_COACHES: CoachProfile[] = [
       { id: 'pkg_10', title: 'Khóa Chiến Thuật Toàn Diện (10 buổi)', sessions: 10, discount_percent: 15, description: 'Lộ trình từ 2.5 lên 3.5+ DUPR, chiến thuật di chuyển đôi, test giải đấu (Tiết kiệm 15%).' }
     ],
     verification_status: 'verified',
+    approval_status: 'approved',
     verified_at: '2026-08-02',
     verified_by: 'user_admin_1',
+    approved_at: '2026-08-02',
+    approved_by: 'user_admin_1',
     is_featured: true,
     rating_avg: 4.9,
     review_count: 38,
     students_count: 64,
+    total_sessions_taught: 48,
+    response_rate_percent: 98,
+    skill_levels_taught: ['Mới bắt đầu', 'Trung cấp', 'Nâng cao'],
+    languages: ['Tiếng Việt', 'English'],
     dupr_level: 5.2,
     created_at: '2026-08-02'
   },
@@ -283,12 +327,17 @@ export const INITIAL_COACHES: CoachProfile[] = [
       { id: 'pkg_10', title: 'Gói Tự Tin Thi Đấu (10 buổi)', sessions: 10, discount_percent: 12, description: 'Hoàn thiện toàn bộ kỹ năng & tư duy đánh đôi (Giảm 12%).' }
     ],
     verification_status: 'verified',
+    approval_status: 'approved',
     verified_at: '2026-08-03',
     verified_by: 'user_admin_1',
     is_featured: false,
     rating_avg: 4.8,
     review_count: 24,
     students_count: 42,
+    total_sessions_taught: 35,
+    response_rate_percent: 96,
+    skill_levels_taught: ['Mới bắt đầu', 'Trung cấp'],
+    languages: ['Tiếng Việt'],
     dupr_level: 4.6,
     created_at: '2026-08-03'
   },
@@ -323,12 +372,17 @@ export const INITIAL_COACHES: CoachProfile[] = [
       { id: 'pkg_10', title: 'Khóa Pro Athlete Mastery (10 buổi)', sessions: 10, discount_percent: 18, description: 'Cam kết nâng rating DUPR tối thiểu +0.6 sau khóa học.' }
     ],
     verification_status: 'verified',
+    approval_status: 'approved',
     verified_at: '2026-08-04',
     verified_by: 'user_admin_1',
     is_featured: true,
     rating_avg: 5.0,
     review_count: 51,
     students_count: 85,
+    total_sessions_taught: 62,
+    response_rate_percent: 100,
+    skill_levels_taught: ['Mới bắt đầu', 'Trung cấp', 'Nâng cao'],
+    languages: ['Tiếng Việt', 'English'],
     dupr_level: 5.0,
     created_at: '2026-08-04'
   },
@@ -362,12 +416,17 @@ export const INITIAL_COACHES: CoachProfile[] = [
       { id: 'pkg_10', title: 'Khóa Chiến Binh Giải Đấu (10 buổi)', sessions: 10, discount_percent: 15, description: 'Trang bị trọn gói tâm lý thi đấu và chiến thuật đỉnh cao.' }
     ],
     verification_status: 'verified',
+    approval_status: 'approved',
     verified_at: '2026-08-05',
     verified_by: 'user_admin_1',
     is_featured: true,
     rating_avg: 4.9,
     review_count: 42,
     students_count: 70,
+    total_sessions_taught: 53,
+    response_rate_percent: 97,
+    skill_levels_taught: ['Trung cấp', 'Nâng cao'],
+    languages: ['Tiếng Việt'],
     dupr_level: 5.6,
     created_at: '2026-08-05'
   },
@@ -401,12 +460,17 @@ export const INITIAL_COACHES: CoachProfile[] = [
       { id: 'pkg_10', title: 'Khóa Pro DUPR 4.0+ (10 buổi)', sessions: 10, discount_percent: 15, description: 'Đào tạo toàn diện đưa học viên lên đẳng cấp 4.0+.' }
     ],
     verification_status: 'verified',
+    approval_status: 'approved',
     verified_at: '2026-08-06',
     verified_by: 'user_admin_1',
     is_featured: false,
     rating_avg: 4.9,
     review_count: 31,
     students_count: 55,
+    total_sessions_taught: 40,
+    response_rate_percent: 95,
+    skill_levels_taught: ['Mới bắt đầu', 'Trung cấp', 'Nâng cao'],
+    languages: ['Tiếng Việt', 'English'],
     dupr_level: 5.4,
     created_at: '2026-08-06'
   },
@@ -440,12 +504,17 @@ export const INITIAL_COACHES: CoachProfile[] = [
       { id: 'pkg_10', title: 'Khóa Tự Tin Ra Sân (10 buổi)', sessions: 10, discount_percent: 12, description: 'Thành thạo toàn bộ chiến thuật đơn & đôi.' }
     ],
     verification_status: 'verified',
+    approval_status: 'approved',
     verified_at: '2026-08-07',
     verified_by: 'user_admin_1',
     is_featured: false,
     rating_avg: 4.8,
     review_count: 29,
     students_count: 48,
+    total_sessions_taught: 38,
+    response_rate_percent: 94,
+    skill_levels_taught: ['Mới bắt đầu', 'Trung cấp'],
+    languages: ['Tiếng Việt'],
     dupr_level: 4.8,
     created_at: '2026-08-07'
   },
@@ -479,12 +548,17 @@ export const INITIAL_COACHES: CoachProfile[] = [
       { id: 'pkg_10', title: 'Khóa Chuyên Gia Pickleball (10 buổi)', sessions: 10, discount_percent: 15, description: 'Nắm vững 100% kỹ thuật và chiến thuật đối kháng.' }
     ],
     verification_status: 'verified',
+    approval_status: 'approved',
     verified_at: '2026-08-08',
     verified_by: 'user_admin_1',
     is_featured: false,
     rating_avg: 4.9,
     review_count: 36,
     students_count: 58,
+    total_sessions_taught: 46,
+    response_rate_percent: 98,
+    skill_levels_taught: ['Mới bắt đầu', 'Trung cấp', 'Nâng cao'],
+    languages: ['Tiếng Việt'],
     dupr_level: 5.1,
     created_at: '2026-08-08'
   },
@@ -526,12 +600,17 @@ export const INITIAL_COACHES: CoachProfile[] = [
       { id: 'pkg_10', title: 'Khóa Đào Tạo Vô Địch (10 buổi)', sessions: 10, discount_percent: 20, description: 'Lộ trình cá nhân hóa đưa học viên chạm mốc DUPR 5.0+.' }
     ],
     verification_status: 'verified',
+    approval_status: 'approved',
     verified_at: '2026-08-09',
     verified_by: 'user_admin_1',
     is_featured: true,
     rating_avg: 5.0,
     review_count: 65,
     students_count: 98,
+    total_sessions_taught: 92,
+    response_rate_percent: 100,
+    skill_levels_taught: ['Trung cấp', 'Nâng cao'],
+    languages: ['Tiếng Việt', 'English'],
     dupr_level: 5.8,
     created_at: '2026-08-09'
   },
@@ -565,12 +644,17 @@ export const INITIAL_COACHES: CoachProfile[] = [
       { id: 'pkg_10', title: 'Khóa Tự Tin Giao Lưu (10 buổi)', sessions: 10, discount_percent: 12, description: 'Tự tin tham gia các câu lạc bộ phong trào.' }
     ],
     verification_status: 'verified',
+    approval_status: 'approved',
     verified_at: '2026-08-10',
     verified_by: 'user_admin_1',
     is_featured: false,
     rating_avg: 4.8,
     review_count: 18,
     students_count: 32,
+    total_sessions_taught: 22,
+    response_rate_percent: 92,
+    skill_levels_taught: ['Mới bắt đầu'],
+    languages: ['Tiếng Việt'],
     dupr_level: 4.5,
     created_at: '2026-08-10'
   },
@@ -602,12 +686,300 @@ export const INITIAL_COACHES: CoachProfile[] = [
       { id: 'pkg_3', title: 'Gói Nhập Môn Căn Bản (3 buổi)', sessions: 3, discount_percent: 5, description: '3 buổi nắm trọn kỹ năng đánh bóng bền.' }
     ],
     verification_status: 'pending',
+    approval_status: 'pending',
     is_featured: false,
     rating_avg: 0,
     review_count: 0,
     students_count: 0,
+    total_sessions_taught: 0,
+    response_rate_percent: 100,
+    skill_levels_taught: ['Mới bắt đầu'],
+    languages: ['Tiếng Việt'],
     dupr_level: 4.0,
     created_at: '2026-08-16'
+  },
+  {
+    id: 'coach_new_zero',
+    user_id: 'user_coach_new_zero',
+    bio: 'HLV trẻ nhiệt huyết vừa hoàn thành chứng chỉ IPTPA Level 1. Đam mê truyền tải kỹ thuật chuẩn chỉ cho học viên mới.',
+    experience_years: 1,
+    price_per_session: 280000,
+    area: 'Quận 7, TP.HCM',
+    courts: ['Sân Pickleball Saigon South Q7'],
+    specialties: ['Người mới bắt đầu', 'Kỹ thuật Dinking căn bản'],
+    teaching_style: 'Kiên nhẫn, chỉ dẫn từng động tác, hỗ trợ video quay chậm.',
+    gallery_urls: ['https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600'],
+    certifications: [
+      {
+        id: 'cert_zero_1',
+        title: 'IPTPA Certified Instructor Level 1',
+        issuer: 'IPTPA International',
+        year: 2026,
+        proof_url: 'https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?w=600',
+        verified: true
+      }
+    ],
+    packages: [
+      { id: 'pkg_1', title: 'Buổi Trải Nghiệm Khởi Động (1 buổi)', sessions: 1, discount_percent: 0, description: 'Làm quen bộ môn Pickleball chuẩn quốc tế.' }
+    ],
+    verification_status: 'verified',
+    approval_status: 'approved',
+    approved_at: '2026-08-17',
+    approved_by: 'user_admin_1',
+    is_featured: false,
+    rating_avg: 0,
+    review_count: 0,
+    students_count: 0,
+    total_sessions_taught: 0,
+    response_rate_percent: 100,
+    skill_levels_taught: ['Mới bắt đầu'],
+    languages: ['Tiếng Việt'],
+    dupr_level: 3.8,
+    created_at: '2026-08-17'
+  },
+  {
+    id: 'coach_suspended',
+    user_id: 'user_coach_suspended',
+    bio: 'HLV từng hoạt động nhưng hiện đang bị tạm đình chỉ do vi phạm quy định sàn (bị học viên khiếu nại). Các booking cũ vẫn được giải quyết bình thường.',
+    experience_years: 2,
+    price_per_session: 320000,
+    area: 'Quận 2, TP.HCM',
+    courts: ['Sân V-Pickle Sala Q2'],
+    specialties: ['Kỹ thuật nâng cao'],
+    teaching_style: 'Thực chiến',
+    gallery_urls: ['https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600'],
+    certifications: [],
+    packages: [
+      { id: 'pkg_1', title: 'Buổi Tập (1 buổi)', sessions: 1, discount_percent: 0, description: 'Tập kỹ thuật.' }
+    ],
+    verification_status: 'verified',
+    approval_status: 'suspended',
+    rejection_reason: 'Tài khoản đang bị tạm ngưng nhận lịch mới do có 2 khiếu nại chất lượng buổi học.',
+    is_featured: false,
+    rating_avg: 3.2,
+    review_count: 5,
+    students_count: 10,
+    total_sessions_taught: 8,
+    response_rate_percent: 60,
+    skill_levels_taught: ['Trung cấp'],
+    languages: ['Tiếng Việt'],
+    dupr_level: 4.0,
+    created_at: '2026-08-01'
+  }
+];
+
+// ==========================================
+// 2.1 BẢNG COACH AVAILABILITY (2 TẦNG: LẶP LẠI & NGÀY CỤ THỂ + BLOCKED)
+// ==========================================
+export const INITIAL_COACH_AVAILABILITY_RULES: CoachAvailabilityRule[] = [
+  // HLV Khoa: Lịch rảnh lặp lại Thứ 2 (1), Thứ 4 (3), Thứ 6 (5), Chủ Nhật (0)
+  { id: 'rule_av_1', coach_id: 'coach_khoa', day_of_week: 1, start_time: '07:30', end_time: '09:30', court_name: 'Sân Pickleball Saigon South Q7', is_blocked: false, created_at: '2026-08-01' },
+  { id: 'rule_av_2', coach_id: 'coach_khoa', day_of_week: 3, start_time: '18:00', end_time: '20:00', court_name: 'Sân V-Pickle Sala Q2', is_blocked: false, created_at: '2026-08-01' },
+  { id: 'rule_av_3', coach_id: 'coach_khoa', day_of_week: 5, start_time: '17:30', end_time: '19:30', court_name: 'Sân D-Pickle City Thảo Điền', is_blocked: false, created_at: '2026-08-01' },
+  { id: 'rule_av_4', coach_id: 'coach_khoa', day_of_week: 0, start_time: '08:00', end_time: '10:30', court_name: 'Sân Pickleball Saigon South Q7', is_blocked: false, created_at: '2026-08-01' },
+  
+  // Specific date rảnh: 2026-08-20, 2026-08-21, 2026-08-22, 2026-08-23
+  { id: 'rule_av_5', coach_id: 'coach_khoa', specific_date: '2026-08-20', start_time: '08:00', end_time: '10:00', court_name: 'Sân Pickleball Saigon South Q7', is_blocked: false, created_at: '2026-08-01' },
+  { id: 'rule_av_6', coach_id: 'coach_khoa', specific_date: '2026-08-20', start_time: '17:00', end_time: '19:00', court_name: 'Sân V-Pickle Sala Q2', is_blocked: false, created_at: '2026-08-01' },
+  { id: 'rule_av_7', coach_id: 'coach_khoa', specific_date: '2026-08-21', start_time: '07:30', end_time: '09:30', court_name: 'Sân D-Pickle City Thảo Điền', is_blocked: false, created_at: '2026-08-01' },
+  { id: 'rule_av_8', coach_id: 'coach_khoa', specific_date: '2026-08-21', start_time: '18:00', end_time: '20:00', court_name: 'Sân V-Pickle Sala Q2', is_blocked: false, created_at: '2026-08-01' },
+
+  // Blocked date test (TC4 - Priority test): Ngày 2026-08-25 HLV Khoa bận việc riêng (is_blocked = true) ghi đè lịch lặp
+  { id: 'rule_av_blocked_1', coach_id: 'coach_khoa', specific_date: '2026-08-25', start_time: '00:00', end_time: '23:59', court_name: 'Nghỉ cá nhân', is_blocked: true, created_at: '2026-08-02' }
+];
+
+// ==========================================
+// 2.2 BẢNG QUY TẮC CHÍNH SÁCH HỦY & HOÀN TIỀN (CANCELLATION POLICY RULES)
+// ==========================================
+export const INITIAL_CANCELLATION_RULES: CancellationPolicyRule[] = [
+  {
+    id: 'rule_cancel_24h',
+    hours_before_session: 24,
+    refund_percent: 100,
+    applies_to: 'student_cancel',
+    title: 'Học viên hủy trước ≥ 24 giờ',
+    description: 'Hoàn tiền 100% học phí về tài khoản/ví học viên. Không phát sinh bất kỳ khoản phí phạt nào.'
+  },
+  {
+    id: 'rule_cancel_2_24h',
+    hours_before_session: 2,
+    refund_percent: 50,
+    applies_to: 'student_cancel',
+    title: 'Học viên hủy trong khoảng 2h - 24h',
+    description: 'Hoàn tiền 50% cho học viên. 50% còn lại giải ngân cho HLV để bù đắp thời gian và giữ sân.'
+  },
+  {
+    id: 'rule_cancel_under_2h',
+    hours_before_session: 0,
+    refund_percent: 0,
+    applies_to: 'student_cancel',
+    title: 'Học viên hủy sát giờ (< 2 giờ)',
+    description: 'Hoàn tiền 0%. 90% học phí được giải ngân đầy đủ cho HLV (sau trừ 10% phí sàn).'
+  },
+  {
+    id: 'rule_coach_cancel_anytime',
+    hours_before_session: 0,
+    refund_percent: 100,
+    applies_to: 'coach_cancel',
+    title: 'HLV chủ động hủy buổi học',
+    description: 'Học viên luôn được hoàn tiền 100% học phí bất kể thời gian hủy. HLV có thể bị ghi nhận vi phạm tỷ lệ phục vụ.'
+  },
+  {
+    id: 'rule_no_show_student',
+    hours_before_session: 0,
+    refund_percent: 0,
+    applies_to: 'no_show',
+    title: 'Học viên vắng mặt không báo trước (No-show)',
+    description: 'Hoàn tiền 0%. HLV được giải ngân đầy đủ học phí do đã có mặt tại sân đúng giờ.'
+  },
+  {
+    id: 'rule_no_show_coach',
+    hours_before_session: 0,
+    refund_percent: 100,
+    applies_to: 'no_show',
+    title: 'HLV vắng mặt không báo trước (No-show)',
+    description: 'Hoàn tiền 100% cho học viên. HLV bị phạt cảnh cáo và tạm khóa nhận lịch mới.'
+  }
+];
+
+// ==========================================
+// 2.3 BẢNG ADMIN USERS & RBAC ROLES
+// ==========================================
+export const INITIAL_ADMIN_USERS: AdminUser[] = [
+  {
+    id: 'admin_user_super',
+    user_id: 'user_admin_1',
+    user_name: 'Nguyễn Hải Long (Super Admin Lead)',
+    email: 'long.admin@pickleconnect.vn',
+    role_name: 'super_admin',
+    permissions: ['approve_coach', 'resolve_dispute', 'view_finance', 'manage_admins', 'manual_refund', 'suspend_coach', 'hide_review'],
+    created_at: '2026-08-01'
+  },
+  {
+    id: 'admin_user_support',
+    user_id: 'user_admin_support',
+    user_name: 'Trần Minh Support (Support Admin)',
+    email: 'support.admin@pickleconnect.vn',
+    role_name: 'support_admin',
+    permissions: ['approve_coach', 'resolve_dispute', 'suspend_coach', 'hide_review'],
+    created_at: '2026-08-05'
+  },
+  {
+    id: 'admin_user_finance',
+    user_id: 'user_admin_finance',
+    user_name: 'Phạm Thu Finance (Finance Admin)',
+    email: 'finance.admin@pickleconnect.vn',
+    role_name: 'finance_admin',
+    permissions: ['view_finance', 'manual_refund', 'resolve_dispute'],
+    created_at: '2026-08-05'
+  }
+];
+
+// ==========================================
+// 2.4 BẢNG NHẬT KÝ ADMIN ACTION LOGS (AUDIT TRAIL)
+// ==========================================
+export const INITIAL_ADMIN_LOGS: AdminActionLog[] = [
+  {
+    id: 'log_1',
+    admin_id: 'admin_user_super',
+    admin_name: 'Nguyễn Hải Long',
+    role_name: 'super_admin',
+    action: 'APPROVE_COACH',
+    target_type: 'coach',
+    target_id: 'coach_khoa',
+    details: 'Phê duyệt hồ sơ HLV IPTPA Level 2 và cấp huy hiệu Verified',
+    timestamp: '2026-08-02 10:15'
+  },
+  {
+    id: 'log_2',
+    admin_id: 'admin_user_finance',
+    admin_name: 'Phạm Thu Finance',
+    role_name: 'finance_admin',
+    action: 'RELEASE_ESCROW',
+    target_type: 'payment',
+    target_id: 'pay_2',
+    details: 'Giải ngân 405.000đ cho HLV Nguyễn Đăng Khoa sau khi buổi học hoàn thành',
+    timestamp: '2026-08-10 18:00'
+  },
+  {
+    id: 'log_3',
+    admin_id: 'admin_user_support',
+    admin_name: 'Trần Minh Support',
+    role_name: 'support_admin',
+    action: 'VERIFY_DOCUMENTS',
+    target_type: 'coach',
+    target_id: 'coach_ha',
+    details: 'Xác minh chứng chỉ PPR Level 2 Head Coach hợp lệ',
+    timestamp: '2026-08-04 14:20'
+  }
+];
+
+// ==========================================
+// 2.5 BẢNG NHẮC LỊCH SESSION REMINDERS (CRON SCHEDULER)
+// ==========================================
+export const INITIAL_REMINDERS: SessionReminder[] = [
+  {
+    id: 'rem_1',
+    booking_id: 'book_khoa_1',
+    reminder_type: '24h_before',
+    recipient_type: 'student',
+    recipient_id: 'user_1',
+    recipient_name: 'Trần Thị Lan',
+    booking_summary: 'Buổi học Third Shot Drop & Kỹ thuật Dinking với HLV Nguyễn Đăng Khoa',
+    session_start_time: '2026-08-20 08:00',
+    sent_at: '2026-08-19 08:00',
+    status: 'sent',
+    created_at: '2026-08-18'
+  },
+  {
+    id: 'rem_2',
+    booking_id: 'book_khoa_1',
+    reminder_type: '24h_before',
+    recipient_type: 'coach',
+    recipient_id: 'user_coach_khoa',
+    recipient_name: 'Nguyễn Đăng Khoa',
+    booking_summary: 'Buổi dạy học viên Trần Thị Lan lúc 08:00 tại Sân Saigon South Q7',
+    session_start_time: '2026-08-20 08:00',
+    sent_at: '2026-08-19 08:00',
+    status: 'sent',
+    created_at: '2026-08-18'
+  }
+];
+
+// ==========================================
+// 2.6 BẢNG BÁO CÁO HÀNH VI (QUICK REPORTS - KHÁC DISPUTE)
+// ==========================================
+export const INITIAL_REPORTS: UserReport[] = [
+  {
+    id: 'rep_1',
+    reporter_id: 'user_1',
+    reporter_name: 'Trần Thị Lan',
+    reporter_role: 'student',
+    reported_user_id: 'user_coach_hoang',
+    reported_user_name: 'Lê Hoàng Nam',
+    reported_user_role: 'coach',
+    booking_id: null,
+    reason_category: 'inappropriate_behavior',
+    description: 'HLV có thái độ thiếu nhiệt tình và sử dụng điện thoại liên tục trong suốt 30 phút đầu buổi tập.',
+    status: 'open',
+    created_at: '2026-08-15 09:30'
+  },
+  {
+    id: 'rep_2',
+    reporter_id: 'user_2',
+    reporter_name: 'Lê Hoàng Minh',
+    reporter_role: 'student',
+    reported_user_id: 'user_coach_duy',
+    reported_user_name: 'Đinh Khắc Duy',
+    reported_user_role: 'coach',
+    booking_id: 'book_duy_1',
+    reason_category: 'fake_profile',
+    description: 'Thông tin chứng chỉ IPTPA trên hồ sơ không trùng khớp với tên thật khi xuất trình thẻ.',
+    status: 'reviewing',
+    handled_by: 'admin_user_support',
+    handler_name: 'Trần Minh Support',
+    resolution_note: 'Đang yêu cầu HLV gửi bản scan thẻ chứng chỉ gốc có mộc giáp lai để đối chiếu.',
+    created_at: '2026-08-14 15:45'
   }
 ];
 
@@ -656,12 +1028,12 @@ export const INITIAL_BOOKINGS: Booking[] = [
     id: 'booking_1',
     student_id: 'user_student_1',
     student_name: 'Trần Thị Lan',
-    student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     student_phone: '0912345678',
     student_email: 'lan.tran@gmail.com',
     coach_id: 'coach_khoa',
     coach_name: 'Nguyễn Đăng Khoa',
-    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     slot_id: 'slot_1',
     date: '2026-08-20',
     start_time: '08:00',
@@ -679,12 +1051,12 @@ export const INITIAL_BOOKINGS: Booking[] = [
     id: 'booking_2',
     student_id: 'user_student_1',
     student_name: 'Trần Thị Lan',
-    student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     student_phone: '0912345678',
     student_email: 'lan.tran@gmail.com',
     coach_id: 'coach_khoa',
     coach_name: 'Nguyễn Đăng Khoa',
-    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     slot_id: 'slot_5',
     date: '2026-08-10',
     start_time: '16:00',
@@ -702,12 +1074,12 @@ export const INITIAL_BOOKINGS: Booking[] = [
     id: 'booking_3',
     student_id: 'user_student_2',
     student_name: 'Lê Hoàng Minh',
-    student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     student_phone: '0987654321',
     student_email: 'minh.le@gmail.com',
     coach_id: 'coach_ha',
     coach_name: 'Vũ Thu Hà',
-    coach_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     slot_id: 'slot_ha_1',
     date: '2026-08-20',
     start_time: '06:30',
@@ -725,12 +1097,12 @@ export const INITIAL_BOOKINGS: Booking[] = [
     id: 'booking_4',
     student_id: 'user_student_3',
     student_name: 'Nguyễn Văn Hùng',
-    student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+    student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     student_phone: '0903112233',
     student_email: 'hung.nguyen@gmail.com',
     coach_id: 'coach_nam',
     coach_name: 'Lê Hoàng Nam',
-    coach_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
     slot_id: 'slot_nam_1',
     date: '2026-08-20',
     start_time: '07:00',
@@ -743,6 +1115,171 @@ export const INITIAL_BOOKINGS: Booking[] = [
     notes: 'Luyện cú Erne chuẩn bị giải Đà Nẵng Open.',
     created_at: '2026-08-14',
     has_reviewed: false
+  },
+  {
+    id: 'booking_sample_dispute',
+    student_id: 'user_student_6',
+    student_name: 'Đỗ Thanh Thảo',
+    student_avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    student_phone: '0977889900',
+    student_email: 'thao.do@gmail.com',
+    coach_id: 'coach_khoa',
+    coach_name: 'Nguyễn Đăng Khoa',
+    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    slot_id: 'slot_6',
+    date: '2026-08-14',
+    start_time: '18:00',
+    end_time: '19:30',
+    court_name: 'Sân D-Pickle City Thảo Điền',
+    package_title: 'Buổi Trải Nghiệm & Đánh Giá (1 buổi)',
+    session_count: 1,
+    total_price: 450000,
+    status: 'confirmed',
+    notes: 'Kiểm tra kỹ thuật dinking.',
+    created_at: '2026-08-13',
+    has_reviewed: false
+  },
+  {
+    id: 'booking_sample_refund',
+    student_id: 'user_student_4',
+    student_name: 'Phạm Thu Trang',
+    student_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    student_phone: '0918223344',
+    student_email: 'trang.pham@gmail.com',
+    coach_id: 'coach_anh',
+    coach_name: 'Phạm Tuấn Anh',
+    coach_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    slot_id: 'slot_anh_2',
+    date: '2026-08-12',
+    start_time: '17:00',
+    end_time: '18:30',
+    court_name: 'Sân Pickleball Thảo Điền',
+    package_title: 'Gói Cơ Bản Vững Vàng (3 buổi)',
+    session_count: 3,
+    total_price: 1083000,
+    status: 'cancelled',
+    cancellation_reason: 'Học viên hủy trước 48h (Hoàn 100% Escrow)',
+    notes: 'Lịch công tác đột xuất.',
+    created_at: '2026-08-10',
+    has_reviewed: false
+  }
+];
+
+// ==========================================
+// 4.1. DANH SÁCH GIAO DỊCH THANH TOÁN TẠM GIỮ (ESCROW PAYMENTS)
+// ==========================================
+
+export const INITIAL_PAYMENTS: Payment[] = [
+  {
+    id: 'pay_1',
+    booking_id: 'booking_1',
+    student_id: 'user_student_1',
+    student_name: 'Trần Thị Lan',
+    student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    coach_id: 'coach_khoa',
+    coach_name: 'Nguyễn Đăng Khoa',
+    amount: 1282500,
+    commission_rate: 0.10,
+    commission_amount: 128250,
+    payout_amount: 1154250,
+    status: 'held',
+    paid_at: '2026-08-15 08:30',
+    payment_method: 'qr_escrow'
+  },
+  {
+    id: 'pay_2',
+    booking_id: 'booking_2',
+    student_id: 'user_student_1',
+    student_name: 'Trần Thị Lan',
+    student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    coach_id: 'coach_khoa',
+    coach_name: 'Nguyễn Đăng Khoa',
+    amount: 450000,
+    commission_rate: 0.10,
+    commission_amount: 45000,
+    payout_amount: 405000,
+    status: 'released',
+    paid_at: '2026-08-08 14:00',
+    released_at: '2026-08-10 18:00',
+    payment_method: 'pickle_wallet'
+  },
+  {
+    id: 'pay_3',
+    booking_id: 'booking_3',
+    student_id: 'user_student_2',
+    student_name: 'Lê Hoàng Minh',
+    student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    coach_id: 'coach_ha',
+    coach_name: 'Vũ Thu Hà',
+    amount: 1410000,
+    commission_rate: 0.10,
+    commission_amount: 141000,
+    payout_amount: 1269000,
+    status: 'held',
+    paid_at: '2026-08-16 10:15',
+    payment_method: 'card_visa'
+  },
+  {
+    id: 'pay_4',
+    booking_id: 'booking_4',
+    student_id: 'user_student_3',
+    student_name: 'Nguyễn Văn Hùng',
+    student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    coach_id: 'coach_nam',
+    coach_name: 'Lê Hoàng Nam',
+    amount: 1197000,
+    commission_rate: 0.10,
+    commission_amount: 119700,
+    payout_amount: 1077300,
+    status: 'held',
+    paid_at: '2026-08-14 11:20',
+    payment_method: 'qr_escrow'
+  },
+  {
+    id: 'pay_5',
+    booking_id: 'booking_sample_dispute',
+    student_id: 'user_student_6',
+    student_name: 'Đỗ Thanh Thảo',
+    student_avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    coach_id: 'coach_khoa',
+    coach_name: 'Nguyễn Đăng Khoa',
+    amount: 450000,
+    commission_rate: 0.10,
+    commission_amount: 45000,
+    payout_amount: 405000,
+    status: 'disputed',
+    paid_at: '2026-08-13 14:20',
+    dispute_reason: 'HLV đến trễ 20 phút do kẹt xe và buổi tập kết thúc vội, học viên đề nghị hoàn tiền hoặc sắp xếp 1 buổi học bù đảm bảo cam kết chất lượng.',
+    payment_method: 'qr_escrow'
+  },
+  {
+    id: 'pay_6',
+    booking_id: 'booking_sample_refund',
+    student_id: 'user_student_4',
+    student_name: 'Phạm Thu Trang',
+    student_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+    coach_id: 'coach_anh',
+    coach_name: 'Phạm Tuấn Anh',
+    amount: 1083000,
+    commission_rate: 0.10,
+    commission_amount: 108300,
+    payout_amount: 974700,
+    status: 'refunded',
+    paid_at: '2026-08-10 09:15',
+    refunded_at: '2026-08-11 10:30',
+    refund_reason: 'Học viên có lịch công tác đột xuất, thực hiện hủy trước 48h theo chính sách (Hoàn 100% qua Escrow).',
+    payment_method: 'pickle_wallet'
+  }
+];
+
+export const INITIAL_PAYOUTS: PayoutHistory[] = [
+  {
+    id: 'payout_1',
+    coach_id: 'coach_khoa',
+    payment_id: 'pay_2',
+    booking_id: 'booking_2',
+    amount: 405000,
+    created_at: '2026-08-10 18:00'
   }
 ];
 
@@ -756,7 +1293,7 @@ export const INITIAL_REVIEWS: Review[] = [
     booking_id: 'booking_2',
     student_id: 'user_student_1',
     student_name: 'Trần Thị Lan',
-    student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     coach_id: 'coach_khoa',
     rating: 5,
     comment: 'Thầy Khoa dạy cực kỳ tận tâm! Chỉ sau 1 buổi thầy đã chỉ ra lỗi xoay hông sai của mình khiến bóng hay rúc lưới. Video quay slow-motion phân tích rất trực quan. Chắc chắn sẽ đăng ký tiếp gói 10 buổi!',
@@ -770,26 +1307,95 @@ export const INITIAL_REVIEWS: Review[] = [
     booking_id: 'booking_old_1',
     student_id: 'user_student_7',
     student_name: 'Bùi Anh Tuấn',
-    student_avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150',
+    student_avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     coach_id: 'coach_khoa',
     rating: 5,
-    comment: 'Khóa học chất lượng cao, đúng chuẩn quốc tế. Thầy Khoa có bài tập drill với máy bắn bóng giúp phản xạ lưới tiến bộ trông thấy!',
+    comment: 'Khóa học chất lượng cao, đúng chuẩn quốc tế IPTPA. Thầy Khoa có bài tập drill với máy bắn bóng giúp phản xạ lưới tiến bộ trông thấy!',
     created_at: '2026-08-09',
     is_hidden: false,
-    skill_tags: ['Tiến bộ nhanh', 'Drill thực chiến']
+    skill_tags: ['Tiến bộ nhanh', 'Drill thực chiến', 'Chuẩn IPTPA']
   },
   {
     id: 'rev_3',
     booking_id: 'booking_old_2',
     student_id: 'user_student_4',
     student_name: 'Phạm Thu Trang',
-    student_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    student_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     coach_id: 'coach_ha',
     rating: 5,
-    comment: 'Cô Hà dạy cực kỳ dễ hiểu, truyền cảm hứng rất tốt cho các bạn nữ mới chơi. Sân tập đẹp, giáo án bài bản.',
+    comment: 'Cô Hà dạy cực kỳ dễ hiểu, truyền cảm hứng rất tốt cho các bạn nữ mới chơi. Sân tập đẹp, giáo án bài bản và tâm lý.',
     created_at: '2026-08-12',
     is_hidden: false,
-    skill_tags: ['Phù hợp cho nữ', 'Dễ hiểu & Chu đáo']
+    coach_reply: 'Cảm ơn Trang! Cố gắng duy trì phản xạ tay chân nhịp nhàng như buổi rồi là sẽ lên DUPR 3.5 sớm thôi.',
+    skill_tags: ['Phù hợp cho nữ', 'Dễ hiểu & Chu đáo', 'Tâm lý & Kiên nhẫn']
+  },
+  {
+    id: 'rev_4',
+    booking_id: 'booking_old_3',
+    student_id: 'user_student_2',
+    student_name: 'Lê Hoàng Minh',
+    student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
+    coach_id: 'coach_anh',
+    rating: 5,
+    comment: 'Thầy Tuấn Anh chỉ dẫn kỹ thuật Dinking góc chéo và Reset bóng cực kỳ chi tiết. Từ người chưa biết gì sau 5 buổi đã tự tin thi đấu giao lưu!',
+    created_at: '2026-08-14',
+    is_hidden: false,
+    coach_reply: 'Tuyệt vời lắm Minh, cảm giác bóng của em đã lên tay rất nhiều!',
+    skill_tags: ['Dinking đối kháng', 'Tận tình', 'Sửa dáng chuẩn']
+  },
+  {
+    id: 'rev_5',
+    booking_id: 'booking_old_4',
+    student_id: 'user_student_5',
+    student_name: 'Hoàng Quốc Bảo',
+    student_avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
+    coach_id: 'coach_long_pb',
+    rating: 5,
+    comment: 'Thầy Bảo Long ở đẳng cấp chuyên gia quốc tế thực thụ. Buổi thẩm định DUPR và giáo án chiến thuật đôi nam giúp team mình thắng giải cúp giao lưu CLB.',
+    created_at: '2026-08-13',
+    is_hidden: false,
+    coach_reply: 'Chúc mừng Bảo và đồng đội, giữ vững phong độ thi đấu cự ly lưới nhé!',
+    skill_tags: ['DUPR 5.0+ Đỉnh cao', 'Chiến thuật thi đấu', 'Chuyên gia Master']
+  },
+  {
+    id: 'rev_6',
+    booking_id: 'booking_old_5',
+    student_id: 'user_student_3',
+    student_name: 'Nguyễn Văn Hùng',
+    student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
+    coach_id: 'coach_nam',
+    rating: 5,
+    comment: 'HLV Hoàng Nam ở Đà Nẵng dạy rất chuyên nghiệp. Sân bãi thoáng mát, bài tập di chuyển chân và cú Erne cực kỳ ăn điểm.',
+    created_at: '2026-08-15',
+    is_hidden: false,
+    skill_tags: ['Chiến thuật Erne', 'Di chuyển Footwork', 'Đà Nẵng uy tín']
+  },
+  {
+    id: 'rev_7',
+    booking_id: 'booking_old_6',
+    student_id: 'user_student_6',
+    student_name: 'Đặng Thanh Thảo',
+    student_avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
+    coach_id: 'coach_ngoc',
+    rating: 5,
+    comment: 'Cô Ngọc rất nhẹ nhàng, chỉ bảo từng cú đập bóng và đỡ giao bóng cho người mới bắt đầu. Không hề bị áp lực hay sợ hãi.',
+    created_at: '2026-08-16',
+    is_hidden: false,
+    coach_reply: 'Cảm ơn Thảo, tiếp tục phát huy sự tự tin trên sân nhé!',
+    skill_tags: ['Nhập môn êm ái', 'Thân thiện', 'Chu đáo']
+  },
+  {
+    id: 'rev_8',
+    booking_id: 'booking_old_7',
+    student_id: 'user_student_8',
+    student_name: 'Vũ Đức Thịnh',
+    student_avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
+    coach_id: 'coach_vinh',
+    rating: 5,
+    comment: 'Mình chuyển từ Tennis sang Pickleball hay bị lỗi vung vợt quá rộng, thầy Vinh chỉnh đúng 2 buổi là bóng vào form sắc bén ngay!',
+    created_at: '2026-08-14',
+    is_hidden: false,
+    skill_tags: ['Chuyển từ Tennis', 'Sửa lỗi chuẩn xác', 'USPTA Pro']
   }
 ];
 
@@ -927,6 +1533,76 @@ export const INITIAL_TEST_CASES: TestCaseItem[] = [
     actual: 'Layout mobile chuẩn 100%, chạm mượt mà, UX tự nhiên',
     status: 'Fixed',
     tested_by: 'Quân & Long'
+  },
+  {
+    id: 'TC-P01',
+    title: 'Học viên đặt lịch thành công -> payment.status = held',
+    module: 'Thanh toán Escrow (Lan)',
+    steps: '1. Học viên chọn HLV & gói học\n2. Bấm Xác nhận & Thanh toán Escrow\n3. Kiểm tra bản ghi payment',
+    expected: 'payment.status = "held", số tiền gốc khớp 100%, hoa hồng 10% được tính toán trước',
+    actual: 'Tạo bản ghi payment trạng thái held thành công, tiền lưu trong quỹ bảo chứng',
+    status: 'Pass',
+    tested_by: 'Quân (Tester)'
+  },
+  {
+    id: 'TC-P02',
+    title: 'HLV từ chối booking -> payment tự động chuyển refunded',
+    module: 'Thanh toán Escrow (HLV Khoa)',
+    steps: '1. HLV nhận yêu cầu đặt lịch\n2. HLV bấm Từ chối đơn\n3. Kiểm tra trạng thái payment',
+    expected: 'payment.status tự động chuyển sang "refunded", hoàn tiền 100% cho học viên',
+    actual: 'Hệ thống tự động refund, giải phóng slot và ghi nhận lý do từ chối',
+    status: 'Pass',
+    tested_by: 'Quân (Tester)'
+  },
+  {
+    id: 'TC-P03',
+    title: 'Học viên huỷ trước 24h -> hoàn 100%, payment.status = refunded',
+    module: 'Thanh toán Escrow (Học viên)',
+    steps: '1. Học viên vào Lịch học của tôi\n2. Chọn đơn Pending/Confirmed trước 24h\n3. Bấm Hủy lịch học',
+    expected: 'Hệ thống hoàn tiền 100% qua Escrow, payment.status = "refunded"',
+    actual: 'Hoàn trả 100% tiền tạm giữ, cập nhật badge Đã hoàn tiền',
+    status: 'Pass',
+    tested_by: 'Quân (Tester)'
+  },
+  {
+    id: 'TC-P04',
+    title: 'Học viên huỷ dưới 24h -> áp dụng chính sách hoàn theo quy định',
+    module: 'Thanh toán Escrow (Học viên)',
+    steps: '1. Học viên hủy sát giờ (<24h)\n2. Hệ thống kiểm tra điều kiện thời gian\n3. Tính toán tỷ lệ hoàn',
+    expected: 'Hiển thị popup cảnh báo chính sách hoàn tiền sát giờ và xử lý đúng nghiệp vụ',
+    actual: 'Áp dụng chính sách hoàn minh bạch, thông báo rõ ràng cho học viên',
+    status: 'Pass',
+    tested_by: 'Quân (Tester)'
+  },
+  {
+    id: 'TC-P05',
+    title: 'Booking chuyển completed -> payment tự động chuyển released',
+    module: 'Thanh toán Escrow (HLV)',
+    steps: '1. Buổi học diễn ra xong\n2. HLV/Hệ thống bấm Xác nhận hoàn thành\n3. Kiểm tra payout_amount',
+    expected: 'payment.status = "released", payout_amount = amount * 0.9 (trừ 10% hoa hồng)',
+    actual: 'Giải ngân thành công, cộng vào thu nhập thực nhận của HLV, tạo bản ghi payout_history',
+    status: 'Pass',
+    tested_by: 'Quân (Tester)'
+  },
+  {
+    id: 'TC-P06',
+    title: 'Admin xem trang giao dịch -> hiển thị đúng, đủ tất cả trạng thái',
+    module: 'Admin (Long)',
+    steps: '1. Đăng nhập quyền Admin\n2. Vào Quản lý Giao dịch Escrow\n3. Lọc theo held / released / refunded / disputed',
+    expected: 'Hiển thị đầy đủ số liệu GMV, Quỹ Escrow, Doanh thu hoa hồng và bộ lọc trạng thái',
+    actual: 'Thống kê chuẩn xác 100%, bộ lọc phản hồi tức thì',
+    status: 'Pass',
+    tested_by: 'Quân (Tester)'
+  },
+  {
+    id: 'TC-P07',
+    title: 'Validate an toàn commission_rate (Tránh lỗi NaN/Null)',
+    module: 'Core System Backend',
+    steps: '1. Giả lập trường hợp commission_rate = null khi tạo payment\n2. Hệ thống validate và gán mặc định 0.10\n3. Tính toán payout_amount',
+    expected: 'Hệ thống tự động fallback về 10% (0.10), không phát sinh lỗi NaN',
+    actual: 'Validation hoạt động an toàn tuyệt đối, payout_amount luôn tính toán chuẩn',
+    status: 'Pass',
+    tested_by: 'Long (Backend)'
   }
 ];
 
@@ -943,7 +1619,7 @@ export const INITIAL_CLASSES: CoachClass[] = [
     name: 'Lớp Chiến Thuật Dinking & Third Shot Drop',
     coach_id: 'coach_khoa',
     coach_name: 'Nguyễn Đăng Khoa',
-    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     level: 'Trung cấp (DUPR 3.0 - 3.8)',
     schedule: 'Thứ 2 - Thứ 4 - Thứ 6 (18:00 - 19:30)',
     court_name: 'Sân Pickleball Saigon South Q7',
@@ -961,7 +1637,7 @@ export const INITIAL_CLASSES: CoachClass[] = [
     name: 'Lớp Đôi Nam Nữ Thực Chiến & Phản Xạ Kitchen',
     coach_id: 'coach_khoa',
     coach_name: 'Nguyễn Đăng Khoa',
-    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     level: 'Nâng cao (DUPR 3.5 - 4.5)',
     schedule: 'Thứ 3 - Thứ 5 - Thứ 7 (07:30 - 09:00)',
     court_name: 'Sân V-Pickle Sala Q2',
@@ -979,7 +1655,7 @@ export const INITIAL_CLASSES: CoachClass[] = [
     name: 'Lớp Nhập Môn Pickleball & Cầm Vợt Chuẩn IPTPA',
     coach_id: 'coach_anh',
     coach_name: 'Phạm Tuấn Anh',
-    coach_avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     level: 'Cơ bản (DUPR 2.0 - 2.8)',
     schedule: 'Thứ 3 - Thứ 5 (17:00 - 18:30)',
     court_name: 'Sân PickleClub Thảo Điền',
@@ -997,7 +1673,7 @@ export const INITIAL_CLASSES: CoachClass[] = [
     name: 'Lớp Phòng Thủ Reset & Bước Chân Footwork',
     coach_id: 'coach_anh',
     coach_name: 'Phạm Tuấn Anh',
-    coach_avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     level: 'Cơ bản - Trung cấp (DUPR 2.5 - 3.2)',
     schedule: 'Thứ 7 - Chủ Nhật (08:00 - 09:30)',
     court_name: 'Sân VietPickle Bình Quới',
@@ -1015,7 +1691,7 @@ export const INITIAL_CLASSES: CoachClass[] = [
     name: 'Lớp Kỹ Thuật Chuyên Biệt Nữ & Tốc Độ Kitchen',
     coach_id: 'coach_ha',
     coach_name: 'Vũ Thu Hà',
-    coach_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     level: 'Trung cấp (DUPR 2.8 - 3.6)',
     schedule: 'Thứ 2 - Thứ 4 (06:30 - 08:00)',
     court_name: 'Sân Westlake Pickleball Club',
@@ -1033,7 +1709,7 @@ export const INITIAL_CLASSES: CoachClass[] = [
     name: 'Lớp Phát Bóng Xoáy Topspin & Smash Dứt Điểm',
     coach_id: 'coach_ha',
     coach_name: 'Vũ Thu Hà',
-    coach_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     level: 'Trung - Cao cấp (DUPR 3.2 - 4.2)',
     schedule: 'Thứ 3 - Thứ 6 (18:00 - 19:30)',
     court_name: 'Sân Cầu Giấy Arena',
@@ -1051,7 +1727,7 @@ export const INITIAL_CLASSES: CoachClass[] = [
     name: 'Lớp Đột Phá Erne & Kỹ Thuật ATP Miền Trung',
     coach_id: 'coach_nam',
     coach_name: 'Lê Hoàng Nam',
-    coach_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     level: 'Nâng cao (DUPR 3.5 - 5.0)',
     schedule: 'Thứ 2 - Thứ 5 - Thứ 7 (07:00 - 08:30)',
     court_name: 'Sân Pickleball Sông Hàn',
@@ -1069,7 +1745,7 @@ export const INITIAL_CLASSES: CoachClass[] = [
     name: 'Lớp Phản Xạ Fast Hands & Tranh Chấp Lưới Kitchen',
     coach_id: 'coach_quan',
     coach_name: 'Đặng Minh Quân',
-    coach_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     level: 'Trung cấp (DUPR 3.0 - 4.0)',
     schedule: 'Thứ 3 - Thứ 5 (18:30 - 20:00)',
     court_name: 'Sân Pickleball Hoa Lư Q1',
@@ -1087,7 +1763,7 @@ export const INITIAL_CLASSES: CoachClass[] = [
     name: 'Lớp Luyện Thi Đấu Đỉnh Cao DUPR 4.5+ (Chuyên Sâu)',
     coach_id: 'coach_long_pb',
     coach_name: 'Phan Bảo Long',
-    coach_avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150',
+    coach_avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&crop=faces&facepad=3&w=300&h=300&q=80',
     level: 'Chuyên nghiệp (DUPR 4.0 - 5.5)',
     schedule: 'Thứ 7 - Chủ Nhật (16:00 - 18:00)',
     court_name: 'Sân PMH Sports Arena Q7',
@@ -1101,4 +1777,217 @@ export const INITIAL_CLASSES: CoachClass[] = [
     description: 'Chuẩn bị thi đấu các giải Open toàn quốc, chiến thuật áp đảo tâm lý, phân tích dữ liệu video cá nhân.'
   }
 ];
+
+// ==========================================
+// 10. DANH SÁCH THÔNG BÁO HỆ THỐNG (NOTIFICATIONS)
+// ==========================================
+export const INITIAL_NOTIFICATIONS = [
+  {
+    id: 'notif_1',
+    user_id: 'user_student_1',
+    title: 'Xác nhận buổi học thành công',
+    message: 'HLV Trần Minh Tuấn đã xác nhận buổi học ngày 2026-08-20 (08:00 - 09:30). Chúc bạn có buổi tập hiệu quả!',
+    type: 'booking' as const,
+    related_id: 'bk_1',
+    is_read: false,
+    created_at: '2026-08-18 09:30'
+  },
+  {
+    id: 'notif_2',
+    user_id: 'user_student_1',
+    title: 'Ký quỹ Escrow an toàn',
+    message: 'Học phí 1.200.000đ của bạn đang được tạm giữ an toàn trong Quỹ Bảo Chứng Escrow theo chính sách Love Your Lesson.',
+    type: 'payment' as const,
+    related_id: 'pay_1',
+    is_read: false,
+    created_at: '2026-08-18 09:28'
+  },
+  {
+    id: 'notif_3',
+    user_id: 'user_coach_1',
+    title: 'Yêu cầu đặt lịch mới',
+    message: 'Học viên Nguyễn Văn An vừa đặt lịch tập "Gói Nhập Môn Nhanh (3 buổi)" vào ngày 2026-08-20.',
+    type: 'booking' as const,
+    related_id: 'bk_1',
+    is_read: false,
+    created_at: '2026-08-18 09:25'
+  },
+  {
+    id: 'notif_4',
+    user_id: 'user_coach_1',
+    title: 'Đã giải ngân thu nhập',
+    message: 'Bạn vừa được giải ngân 405.000đ (90% học phí sau trừ 10% phí sàn) cho buổi học hoàn thành.',
+    type: 'payment' as const,
+    related_id: 'pay_3',
+    is_read: true,
+    created_at: '2026-08-17 17:00'
+  },
+  {
+    id: 'notif_5',
+    user_id: 'user_admin_1',
+    title: 'Hồ sơ HLV mới chờ duyệt',
+    message: 'Có hồ sơ HLV mới đang chờ duyệt: Vũ Hải Đăng (Đà Nẵng). Vui lòng kiểm tra chứng chỉ.',
+    type: 'verification' as const,
+    related_id: 'coach_pending',
+    is_read: false,
+    created_at: '2026-08-18 08:00'
+  },
+  {
+    id: 'notif_6',
+    user_id: 'user_coach_1',
+    title: 'Đánh giá 5 sao mới',
+    message: 'Học viên Lê Thị Bình vừa đánh giá 5 sao cho bạn: "Thầy Tuấn dạy dinking và drop shot siêu kỹ..."',
+    type: 'review' as const,
+    related_id: 'rev_1',
+    is_read: false,
+    created_at: '2026-08-18 07:15'
+  }
+];
+
+// ==========================================
+// 11. DANH SÁCH HLV YÊU THÍCH (WISHLISTS)
+// ==========================================
+export const INITIAL_WISHLISTS = [
+  {
+    id: 'wish_1',
+    student_id: 'user_student_1',
+    coach_id: 'coach_tuan',
+    created_at: '2026-08-17'
+  },
+  {
+    id: 'wish_2',
+    student_id: 'user_student_1',
+    coach_id: 'coach_huong',
+    created_at: '2026-08-18'
+  }
+];
+
+// ==========================================
+// 12. DANH SÁCH SESSION RECAPS (HÀNH TRÌNH TIẾN BỘ 4 KỸ NĂNG)
+// ==========================================
+export const INITIAL_SESSION_RECAPS: SessionRecap[] = [
+  {
+    id: 'recap_1',
+    booking_id: 'book_khoa_1',
+    coach_id: 'coach_khoa',
+    coach_name: 'Nguyễn Đăng Khoa',
+    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
+    student_id: 'user_student_1',
+    student_name: 'Trần Thị Lan',
+    student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+    note: 'Học viên nắm bắt rất nhanh form chân dink chéo sân và bộ pháp Kitchen. Cần chú ý giữ mặt vợt mở và không vung vợt quá cao khi đối phương smash bóng mạnh.',
+    skill_serve: 4,
+    skill_dink: 5,
+    skill_volley: 4,
+    skill_positioning: 4,
+    created_at: '2026-08-11 10:15',
+    is_late: false,
+    booking_date: '2026-08-11',
+    booking_court: 'Sân Pickleball Saigon South Q7'
+  },
+  {
+    id: 'recap_2',
+    booking_id: 'book_khoa_2',
+    coach_id: 'coach_khoa',
+    coach_name: 'Nguyễn Đăng Khoa',
+    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
+    student_id: 'user_student_2',
+    student_name: 'Lê Hoàng Minh',
+    student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+    note: 'Tiến bộ rõ rệt ở kỹ năng Third Shot Drop từ vạch cuối sân (Baseline). Phát bóng cần mở rộng biên độ hông để tạo độ xoáy sâu hơn vào góc trái của đối thủ.',
+    skill_serve: 3,
+    skill_dink: 4,
+    skill_volley: 4,
+    skill_positioning: 3,
+    created_at: '2026-08-14 18:30',
+    is_late: false,
+    booking_date: '2026-08-14',
+    booking_court: 'Sân D-Pickle City Thảo Điền'
+  },
+  {
+    id: 'recap_3',
+    booking_id: 'book_ha_1',
+    coach_id: 'coach_ha',
+    coach_name: 'Vũ Thu Hà',
+    coach_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400',
+    student_id: 'user_student_3',
+    student_name: 'Nguyễn Văn Hùng',
+    student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
+    note: 'Cú volley phản xạ trên lưới rất dứt khoát và chuẩn xác. Cần giữ thăng bằng tốt hơn khi lùi đón bóng bổng (lob) và phối hợp nhịp nhàng với đồng đội khi chuyển đổi trạng thái.',
+    skill_serve: 5,
+    skill_dink: 4,
+    skill_volley: 5,
+    skill_positioning: 4,
+    created_at: '2026-08-12 16:45',
+    is_late: false,
+    booking_date: '2026-08-12',
+    booking_court: 'Sân Westlake Pickleball Club'
+  }
+];
+
+// ==========================================
+// 13. DANH SÁCH CHỜ WAITLIST (FIFO CHO CA TẬP HOT)
+// ==========================================
+export const INITIAL_WAITLIST_ENTRIES: WaitlistEntry[] = [
+  {
+    id: 'wait_1',
+    booking_id: 'slot_hot_khoa_sat',
+    coach_id: 'coach_khoa',
+    coach_name: 'Nguyễn Đăng Khoa',
+    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
+    student_id: 'user_student_2',
+    student_name: 'Lê Hoàng Minh',
+    student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+    student_phone: '0987654321',
+    position: 1,
+    status: 'waiting',
+    created_at: '2026-08-18 07:30',
+    session_summary: 'Ca Tập Chuyên Sâu Kỹ Thuật (17:00 - 18:30)',
+    date: '2026-08-22',
+    time: '17:00 - 18:30',
+    court_name: 'Sân Pickleball Saigon South Q7',
+    price: 450000
+  },
+  {
+    id: 'wait_2',
+    booking_id: 'slot_hot_khoa_sat',
+    coach_id: 'coach_khoa',
+    coach_name: 'Nguyễn Đăng Khoa',
+    coach_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
+    student_id: 'user_student_3',
+    student_name: 'Nguyễn Văn Hùng',
+    student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
+    student_phone: '0903112233',
+    position: 2,
+    status: 'waiting',
+    created_at: '2026-08-18 08:15',
+    session_summary: 'Ca Tập Chuyên Sâu Kỹ Thuật (17:00 - 18:30)',
+    date: '2026-08-22',
+    time: '17:00 - 18:30',
+    court_name: 'Sân Pickleball Saigon South Q7',
+    price: 450000
+  },
+  {
+    id: 'wait_3',
+    booking_id: 'slot_hot_ha_sun',
+    coach_id: 'coach_ha',
+    coach_name: 'Vũ Thu Hà',
+    coach_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400',
+    student_id: 'user_student_1',
+    student_name: 'Trần Thị Lan',
+    student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+    student_phone: '0912345678',
+    position: 1,
+    status: 'offered',
+    offered_at: '2026-08-18 08:00',
+    offer_expires_at: '2026-08-18 10:00',
+    created_at: '2026-08-17 19:00',
+    session_summary: 'Ca Tập Sáng Chủ Nhật (08:00 - 09:30)',
+    date: '2026-08-23',
+    time: '08:00 - 09:30',
+    court_name: 'Sân Westlake Pickleball Club',
+    price: 500000
+  }
+];
+
 

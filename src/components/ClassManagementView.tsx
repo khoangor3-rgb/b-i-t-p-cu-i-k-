@@ -163,9 +163,6 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                   {effectiveRole === 'coach' && 'Quản Lý Lớp Học & Đội Ngũ HLV'}
                   {effectiveRole === 'student' && 'Khóa Học Nhóm & Lớp Đào Tạo Kỹ Thuật'}
                 </span>
-                <span className="bg-slate-800 text-slate-300 border border-slate-700 text-[11px] font-semibold px-2.5 py-0.5 rounded-md">
-                  Tiêu Chuẩn Tối Đa 5 Học Viên / Lớp
-                </span>
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                 {effectiveRole === 'admin' && 'Điều Phối & Phân Bổ Học Viên'}
@@ -173,9 +170,9 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                 {effectiveRole === 'student' && 'Khóa Học Nhóm & Đội Ngũ HLV'}
               </h2>
               <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl font-normal">
-                {effectiveRole === 'admin' && 'Phân bổ học viên vào các lớp đào tạo chuyên sâu theo huấn luyện viên. Tỷ lệ vàng tối đa 5 học viên mỗi lớp giúp đảm bảo khả năng tương tác và chỉnh sửa kỹ thuật chuẩn xác.'}
+                {effectiveRole === 'admin' && 'Phân bổ học viên vào các lớp đào tạo chuyên sâu theo huấn luyện viên, tối ưu hóa thời gian đào tạo và nâng cao chất lượng bài giảng.'}
                 {effectiveRole === 'coach' && 'Theo dõi các lớp học phụ trách, nắm bắt sĩ số học viên và dễ dàng tra cứu, liên hệ với các huấn luyện viên khác trong hệ thống.'}
-                {effectiveRole === 'student' && 'Khám phá các khóa học nhóm theo tiêu chuẩn 1 HLV kèm tối đa 5 học viên, đảm bảo bạn nhận được sự chỉ dẫn chi tiết và tiến bộ nhanh nhất.'}
+                {effectiveRole === 'student' && 'Khám phá các khóa học nhóm cùng đội ngũ HLV chuyên nghiệp, đảm bảo bạn nhận được sự chỉ dẫn chi tiết và tiến bộ nhanh nhất.'}
               </p>
             </div>
           </div>
@@ -283,11 +280,11 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
 
               <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/60">
                 <div className="flex items-center justify-between text-amber-400 mb-1">
-                  <span className="text-xs font-semibold">Tỷ Lệ Đào Tạo Vàng</span>
+                  <span className="text-xs font-semibold">Tỷ Lệ Đào Tạo</span>
                   <Users className="w-4 h-4 text-amber-400" />
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold text-amber-400">1 : 5</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">Tối đa 5 học viên / lớp</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-amber-400">Nhóm Nhỏ</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">Kèm sát sao từng học viên</div>
               </div>
 
               <div className="bg-slate-800/80 backdrop-blur-sm rounded-xl p-4 border border-slate-700/60">
@@ -394,21 +391,24 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
       {currentTab === 'classes' && (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between text-xs font-medium text-slate-500 px-1 gap-2">
-            <span>Danh sách các khóa học nhóm theo tiêu chuẩn tối đa 5 học viên:</span>
+            <span>Danh sách các khóa học nhóm theo huấn luyện viên:</span>
             <span className="text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 font-semibold">
-              Tỷ lệ đào tạo: 1 HLV kèm tối đa 5 học viên
+              Chương trình đào tạo chuẩn quốc tế
             </span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {classes
-              .filter(cls => !searchQuery || 
-                cls.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                cls.coach_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                cls.area.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                cls.court_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                cls.level.toLowerCase().includes(searchQuery.toLowerCase())
-              )
+              .filter(cls => {
+                if (!searchQuery) return true;
+                const q = (searchQuery || '').trim().toLowerCase();
+                const name = (cls.name || '').toLowerCase();
+                const coachName = (cls.coach_name || '').toLowerCase();
+                const area = (cls.area || '').toLowerCase();
+                const courtName = (cls.court_name || '').toLowerCase();
+                const level = (cls.level || '').toLowerCase();
+                return name.includes(q) || coachName.includes(q) || area.includes(q) || courtName.includes(q) || level.includes(q);
+              })
               .map((cls) => {
                 const coach = getCoachProfile(cls.coach_id);
                 const isFull = cls.student_ids.length >= cls.max_students;
@@ -468,7 +468,7 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                         <img 
                           src={cls.coach_avatar} 
                           alt={cls.coach_name} 
-                          className="w-11 h-11 rounded-lg object-cover ring-1 ring-slate-200 shadow-2xs"
+                          className="w-11 h-11 rounded-lg object-cover object-top ring-1 ring-slate-200 shadow-2xs"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
@@ -479,9 +479,9 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
-                            <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                            <span className="truncate">{cls.court_name} • {cls.area}</span>
+                          <div className="text-[11px] text-slate-500 flex items-start gap-1 mt-0.5 min-w-0">
+                            <MapPin className="w-3 h-3 text-slate-400 shrink-0 mt-0.5" />
+                            <span className="break-words whitespace-normal leading-snug">{cls.court_name} • {cls.area}</span>
                           </div>
                           <div className="text-[11px] text-slate-500 flex items-center gap-1">
                             <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
@@ -506,13 +506,11 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                           <span className="text-[11px] font-semibold text-slate-500">{fillPercent}% chỉ tiêu</span>
                         </div>
 
-                        {/* Progress Bar */}
-                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+                        {/* Progress Bar with Cohesive Brand Gradient */}
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-2">
                           <div 
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              isFull ? 'bg-amber-500' : 'bg-emerald-500'
-                            }`}
-                            style={{ width: `${fillPercent}%` }}
+                            className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600"
+                            style={{ width: `${Math.min(100, fillPercent)}%` }}
                           ></div>
                         </div>
 
@@ -534,7 +532,7 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                                     <img 
                                       src={student.avatar_url} 
                                       alt={student.full_name} 
-                                      className="w-6 h-6 rounded-full object-cover shrink-0 ring-1 ring-slate-300"
+                                      className="w-6 h-6 rounded-full object-cover object-top shrink-0 ring-1 ring-slate-300"
                                     />
                                     <span className="font-semibold text-slate-900 truncate">{student.full_name}</span>
                                     {student.dupr_rating && (
@@ -591,7 +589,7 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                                         <img 
                                           src={student.avatar_url} 
                                           alt={student.full_name} 
-                                          className="w-6 h-6 rounded-full object-cover shrink-0"
+                                          className="w-6 h-6 rounded-full object-cover object-top shrink-0"
                                         />
                                         <span className="font-semibold text-slate-900 truncate">{student.full_name}</span>
                                         {student.dupr_rating && (
@@ -632,7 +630,7 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                               </span>
                             </div>
                             <p className="text-[11px] text-slate-500">
-                              Lớp học duy trì tiêu chuẩn tối đa 5 học viên nhằm tối ưu chất lượng chỉnh sửa kỹ thuật cá nhân.
+                              Lớp học duy trì quy mô đào tạo chuẩn nhằm tối ưu chất lượng chỉnh sửa kỹ thuật cá nhân.
                             </p>
                           </div>
                         )}
@@ -645,7 +643,7 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                       {isFull ? (
                         <div className="text-[11px] text-amber-700 font-semibold flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
-                          Lớp đã đạt giới hạn 5 học viên
+                          Lớp đã đủ học viên
                         </div>
                       ) : (
                         <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
@@ -732,11 +730,14 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {unassignedStudents
-              .filter(st => !searchQuery ||
-                st.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                st.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (st.location && st.location.toLowerCase().includes(searchQuery.toLowerCase()))
-              )
+              .filter(st => {
+                if (!searchQuery) return true;
+                const q = (searchQuery || '').trim().toLowerCase();
+                const name = (st.full_name || '').toLowerCase();
+                const email = (st.email || '').toLowerCase();
+                const loc = (st.location || '').toLowerCase();
+                return name.includes(q) || email.includes(q) || loc.includes(q);
+              })
               .map((student) => {
                 return (
                   <div 
@@ -748,7 +749,7 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                         <img 
                           src={student.avatar_url} 
                           alt={student.full_name} 
-                          className="w-12 h-12 rounded-full object-cover ring-1 ring-slate-200 shrink-0"
+                          className="w-12 h-12 rounded-full object-cover object-top ring-1 ring-slate-200 shrink-0"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="font-bold text-sm text-slate-900 truncate">{student.full_name}</div>
@@ -857,11 +858,14 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {allStudents
-                  .filter(st => !searchQuery ||
-                    st.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    st.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    (st.location && st.location.toLowerCase().includes(searchQuery.toLowerCase()))
-                  )
+                  .filter(st => {
+                    if (!searchQuery) return true;
+                    const q = (searchQuery || '').trim().toLowerCase();
+                    const name = (st.full_name || '').toLowerCase();
+                    const email = (st.email || '').toLowerCase();
+                    const loc = (st.location || '').toLowerCase();
+                    return name.includes(q) || email.includes(q) || loc.includes(q);
+                  })
                   .map((student, index) => {
                     const studentClass = classes.find(c => c.student_ids.includes(student.id));
                     const isEnrolled = !!studentClass;
@@ -876,7 +880,7 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                             <img 
                               src={student.avatar_url} 
                               alt={student.full_name} 
-                              className="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200"
+                              className="w-8 h-8 rounded-full object-cover object-top ring-1 ring-slate-200"
                             />
                             <div>
                               <div className="font-bold text-slate-900">{student.full_name}</div>
@@ -953,19 +957,20 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {coaches
               .filter(coach => {
-                const coachUser = coach.user || users.find(u => u.id === coach.user_id);
-                const coachName = coachUser?.full_name || '';
-                const coachEmail = coachUser?.email || '';
-                const coachPhone = coachUser?.phone || '';
-                
                 if (!searchQuery) return true;
-                const q = searchQuery.toLowerCase();
+                const q = (searchQuery || '').trim().toLowerCase();
+                const coachUser = coach.user || users.find(u => u.id === coach.user_id);
+                const coachName = (coachUser?.full_name || '').toLowerCase();
+                const coachEmail = (coachUser?.email || '').toLowerCase();
+                const coachPhone = (coachUser?.phone || '').toLowerCase();
+                const area = (coach.area || '').toLowerCase();
+                const specialties = coach.specialties || [];
                 return (
-                  coachName.toLowerCase().includes(q) ||
-                  coachEmail.toLowerCase().includes(q) ||
-                  coachPhone.toLowerCase().includes(q) ||
-                  coach.area.toLowerCase().includes(q) ||
-                  coach.specialties.some(s => s.toLowerCase().includes(q))
+                  coachName.includes(q) ||
+                  coachEmail.includes(q) ||
+                  coachPhone.includes(q) ||
+                  area.includes(q) ||
+                  specialties.some(s => (s || '').toLowerCase().includes(q))
                 );
               })
               .map((coach) => {
@@ -989,7 +994,7 @@ export const ClassManagementView: React.FC<ClassManagementViewProps> = ({
                         <img 
                           src={coachAvatar} 
                           alt={coachName} 
-                          className="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-100 shadow-xs shrink-0"
+                          className="w-14 h-14 rounded-2xl object-cover object-top ring-2 ring-slate-100 shadow-xs shrink-0"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">

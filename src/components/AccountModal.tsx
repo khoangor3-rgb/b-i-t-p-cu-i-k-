@@ -15,12 +15,12 @@ interface AccountModalProps {
 }
 
 const PRESET_AVATARS = [
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150'
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80',
+  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80'
 ];
 
 export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onSelectRoleTab }) => {
@@ -428,7 +428,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onS
                           <img 
                             src={currentUser.avatar_url} 
                             alt={currentUser.full_name} 
-                            className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl object-cover ring-2 ring-emerald-400/80 shadow-md"
+                            className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl object-cover object-top ring-2 ring-emerald-400/80 shadow-md"
                           />
                           <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
                         </div>
@@ -584,7 +584,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onS
                               src={url} 
                               alt="Avatar option" 
                               onClick={() => setEditAvatarUrl(url)}
-                              className={`w-10 h-10 rounded-xl object-cover cursor-pointer transition ring-2 ${
+                              className={`w-10 h-10 rounded-xl object-cover object-top cursor-pointer transition ring-2 ${
                                 editAvatarUrl === url ? 'ring-emerald-600 scale-105 shadow-md' : 'ring-transparent opacity-70 hover:opacity-100'
                               }`}
                             />
@@ -1045,7 +1045,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onS
                             <img 
                               src={u.avatar_url} 
                               alt={u.full_name} 
-                              className="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-200 shrink-0"
+                              className="w-10 h-10 rounded-xl object-cover object-top ring-1 ring-slate-200 shrink-0"
                             />
                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
@@ -1224,7 +1224,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose, onS
                       <img 
                         src={u.avatar_url} 
                         alt={u.full_name} 
-                        className="w-11 h-11 rounded-2xl object-cover ring-1 ring-slate-200 shrink-0 group-hover:scale-105 transition"
+                        className="w-11 h-11 rounded-2xl object-cover object-top ring-1 ring-slate-200 shrink-0 group-hover:scale-105 transition"
                       />
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">

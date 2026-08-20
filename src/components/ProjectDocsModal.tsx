@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { 
   X, Database, GitBranch, CheckCircle2, AlertCircle, 
   Layers, Code2, Users, FileText, Sparkles, Check, Table, 
-  Download, Play, Terminal, HelpCircle, Shield, Award, Calendar
+  Download, Play, Terminal, HelpCircle, Shield, Award, Calendar,
+  ExternalLink
 } from 'lucide-react';
 import { PROJECT_TEST_CASES } from '../data/mockData';
 
@@ -201,8 +202,6 @@ CREATE TABLE skill_ratings (
 
         {/* Content Body */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs sm:text-sm text-gray-700">
-          
-          {/* TAB 1: EXACT MATCH WITH EXCEL SHEET */}
           {activeTab === 'excel_matrix' && (
             <div className="space-y-6">
               

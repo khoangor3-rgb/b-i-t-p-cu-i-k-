@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Star, CheckCircle2, MapPin, Award, Play, 
-  Sparkles, Calendar, ShieldCheck, ChevronRight 
+  Sparkles, Calendar, ShieldCheck, ChevronRight,
+  Heart, Clock, Check
 } from 'lucide-react';
-import { CoachProfile, User } from '../../types';
+import { CoachProfile, User, Review } from '../../types';
+import { useApp } from '../../context/AppContext';
+import { CoachBadge } from '../Common/CoachBadge';
 
 interface CoachCardProps {
   coach: CoachProfile;
   coachUser?: User;
+  reviews?: Review[];
   onSelectCoach: (coach: CoachProfile) => void;
   onWatchVideo?: (videoUrl: string, coachName: string) => void;
 }
@@ -15,168 +19,213 @@ interface CoachCardProps {
 export const CoachCard: React.FC<CoachCardProps> = ({ 
   coach, 
   coachUser, 
+  reviews = [],
   onSelectCoach,
   onWatchVideo 
 }) => {
+  const { isCoachWishlisted, toggleWishlist, slots } = useApp();
   const isVerified = coach.verification_status === 'verified';
-  const lowestPackage = coach.packages && coach.packages.length > 0
-    ? coach.packages.reduce((min, p) => p.discount_percent > min.discount_percent ? p : min, coach.packages[0])
-    : null;
+  const isFavorited = isCoachWishlisted ? isCoachWishlisted(coach.id) : false;
+  
+  // Find available slots for this coach
+  const coachSlots = slots.filter(s => s.coach_id === coach.id && !s.is_booked);
+  const soonestSlot = coachSlots.length > 0 ? coachSlots[0] : null;
+
+  // Filter reviews for this coach
+  const coachReviews = reviews.filter(r => r.coach_id === coach.id && !r.is_hidden);
+  const primaryCert = coach.certifications && coach.certifications.length > 0 ? coach.certifications[0] : null;
+  const extraCertsCount = coach.certifications && coach.certifications.length > 1 ? coach.certifications.length - 1 : 0;
 
   return (
-    <div className="group bg-white rounded-2xl border border-gray-200/90 hover:border-emerald-500/50 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden">
-      {/* Top Guarantee Header (Above avatar, completely unobstructed) */}
-      <div className="px-5 pt-3.5 pb-2 flex items-center justify-between gap-2 border-b border-gray-100 bg-emerald-50/30">
-        <span className="inline-flex items-center gap-1.5 bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-2xs">
-          <ShieldCheck className="w-3 h-3 text-emerald-100" />
-          Love Your Lesson • Đảm bảo hài lòng 100%
-        </span>
-        <span className="text-[10px] text-emerald-800 font-semibold hidden sm:inline">HLV Chuẩn Quốc Tế</span>
-      </div>
-
-      {/* Top Banner / Coach Profile area */}
-      <div className="p-5 pt-4 pb-3">
-        <div className="flex items-start gap-4">
-          {/* Avatar with Video button overlay (100% unobstructed face) */}
-          <div className="relative shrink-0">
-            <img 
-              src={coachUser?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'} 
-              alt={coachUser?.full_name} 
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-2 ring-emerald-100 shadow-md group-hover:scale-105 transition duration-300"
-            />
-            {coach.video_intro_url && onWatchVideo && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onWatchVideo(coach.video_intro_url!, coachUser?.full_name || 'HLV');
-                }}
-                className="absolute -bottom-2 -right-2 bg-emerald-600 hover:bg-emerald-700 text-white p-1.5 rounded-full shadow-md transition flex items-center justify-center cursor-pointer group-hover:scale-110"
-                title="Xem Video giới thiệu"
-              >
-                <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
-              </button>
-            )}
+    <div className="group bg-white rounded-3xl border border-slate-200 hover:border-emerald-500/80 shadow-xs hover:shadow-lg transition-all duration-200 flex flex-col justify-between overflow-hidden">
+      
+      <div>
+        {/* 1. TOP HEADER: Trust Bar & Heart Action */}
+        <div className="px-5 py-3 flex items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/70">
+          <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs shrink-0">
+            <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Love Your Lesson • Đổi HLV nếu chưa hài lòng</span>
           </div>
 
-          {/* Coach info header */}
-          <div className="flex-1 min-w-0">
-            {/* Featured Badge placed above Coach Name */}
-            {coach.is_featured && (
-              <div className="mb-1">
-                <span className="inline-flex items-center gap-1 bg-amber-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-2xs uppercase tracking-wider">
-                  <Sparkles className="w-3 h-3 fill-white" />
-                  Nổi Bật
-                </span>
-              </div>
-            )}
+          <button
+            type="button"
+            id={`btn_wishlist_${coach.id}`}
+            aria-label={isFavorited ? 'Bỏ lưu HLV khỏi danh sách yêu thích' : 'Lưu HLV vào danh sách yêu thích'}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleWishlist(coach.id);
+            }}
+            className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+              isFavorited 
+                ? 'text-rose-500 hover:text-rose-600 bg-rose-50' 
+                : 'text-slate-400 hover:text-rose-500 hover:bg-slate-100'
+            }`}
+            title={isFavorited ? 'Bỏ lưu HLV này' : 'Lưu HLV vào danh sách yêu thích'}
+          >
+            <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current text-rose-500' : ''}`} />
+          </button>
+        </div>
 
-            <div className="flex items-center gap-1.5 mb-1">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">
-                {coachUser?.full_name}
-              </h3>
-              {isVerified && (
-                <span className="text-emerald-600 shrink-0" title="Đã xác thực chứng chỉ bởi Admin">
-                  <CheckCircle2 className="w-5 h-5 fill-emerald-600 text-white inline-block" />
-                </span>
+        {/* 2. LEVEL 1 (WHO) & LEVEL 2 (WHY TRUST) */}
+        <div className="p-5 pb-3">
+          <div className="flex items-start gap-4">
+            
+            {/* Coach Avatar */}
+            <div className="relative shrink-0">
+              <img 
+                src={coachUser?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=faces&facepad=5&w=400&h=400&q=80'} 
+                alt={coachUser?.full_name || 'Coach'} 
+                className="w-20 h-20 rounded-2xl object-cover object-top ring-2 ring-slate-100 shadow-xs"
+              />
+              <span className="absolute -bottom-1 -left-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full" title="Sẵn sàng nhận lịch"></span>
+              
+              {coach.video_intro_url && onWatchVideo && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onWatchVideo(coach.video_intro_url!, coachUser?.full_name || 'HLV');
+                  }}
+                  className="absolute -bottom-1.5 -right-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white p-1.5 rounded-full shadow-md transition flex items-center justify-center cursor-pointer"
+                  title="Xem video giới thiệu"
+                >
+                  <Play className="w-3 h-3 fill-white ml-0.5" />
+                </button>
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-gray-600 mb-1.5 flex-wrap">
-              <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">
-                DUPR {coach.dupr_level.toFixed(1)} Pro
-              </span>
-              <span>•</span>
-              <span>{coach.experience_years} năm kinh nghiệm</span>
+            {/* Identity & Credentials */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight truncate">
+                  {coachUser?.full_name || 'HLV Pickleball'}
+                </h3>
+                {isVerified && (
+                  <span title="Bằng cấp và danh tính đã được Admin phê duyệt">
+                    <CheckCircle2 className="w-4 h-4 fill-emerald-600 text-white inline-block" />
+                  </span>
+                )}
+              </div>
+
+              {/* DUPR Rating & Experience */}
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <span className="font-extrabold text-emerald-900 bg-emerald-100/80 px-2 py-0.5 rounded-md border border-emerald-300/60 text-xs flex items-center gap-1">
+                  <Award className="w-3 h-3 text-emerald-700" />
+                  DUPR {coach.dupr_level.toFixed(1)} {coach.dupr_level >= 5.0 ? 'Master' : 'Pro'}
+                </span>
+                <span className="text-xs text-slate-400">•</span>
+                <span className="text-xs font-semibold text-slate-600">{coach.experience_years} năm kinh nghiệm</span>
+              </div>
+
+              {/* Rating & Reviews */}
+              <div className="flex items-center gap-1.5 text-xs">
+                <div className="flex items-center text-amber-500 font-black">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 mr-1" />
+                  <span>{coach.rating_avg > 0 ? coach.rating_avg.toFixed(1) : '5.0'}</span>
+                </div>
+                <span className="text-slate-500">
+                  ({coach.review_count > 0 ? coach.review_count : coachReviews.length} đánh giá)
+                </span>
+                <span className="text-slate-300">•</span>
+                <span className="text-slate-600 font-bold">{coach.students_count} học viên</span>
+              </div>
             </div>
 
-            <div className="flex items-center gap-1 text-xs text-gray-500 truncate">
-              <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-              <span className="truncate">{coach.area}</span>
-            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content & Specialties */}
-      <div className="px-5 py-2 flex-1 flex flex-col justify-between">
-        {/* Rating & reviews counter */}
-        <div className="flex items-center justify-between py-2 border-y border-gray-100 mb-3">
-          <div className="flex items-center gap-1.5">
-            <div className="flex items-center text-amber-500">
-              <Star className="w-4 h-4 fill-amber-400" />
-              <span className="font-bold text-sm text-gray-900 ml-1">
-                {coach.rating_avg > 0 ? coach.rating_avg.toFixed(1) : 'Mới'}
-              </span>
+        {/* 3. LEVEL 3 (WHY FIT) & LEVEL 4 (LOGISTICS) */}
+        <div className="px-5 py-2 space-y-2.5">
+          
+          {/* Primary Certification */}
+          {primaryCert ? (
+            <div className="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 text-xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 font-bold">
+                  <Award className="w-3.5 h-3.5 text-emerald-700" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-bold text-slate-900 text-xs truncate">{primaryCert.title}</div>
+                  <div className="text-[10px] text-slate-500 truncate">{primaryCert.issuer}</div>
+                </div>
+              </div>
+
+              {extraCertsCount > 0 ? (
+                <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full shrink-0">
+                  +{extraCertsCount} chứng chỉ
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/60 px-1.5 py-0.5 rounded shrink-0">
+                  Đã duyệt
+                </span>
+              )}
             </div>
-            <span className="text-xs text-gray-400">
-              • {coach.review_count} đánh giá
-            </span>
-          </div>
-
-          <div className="text-xs text-gray-500">
-            <strong className="text-gray-900 font-semibold">{coach.students_count}</strong> học viên đã học
-          </div>
-        </div>
-
-        {/* Bio snippet */}
-        <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-3">
-          {coach.bio}
-        </p>
-
-        {/* Certifications preview */}
-        {coach.certifications && coach.certifications.length > 0 && (
-          <div className="mb-3">
-            <div className="flex items-center gap-1 text-[11px] text-emerald-800 font-medium bg-emerald-50/70 px-2.5 py-1 rounded-lg border border-emerald-100 truncate">
-              <Award className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span className="truncate">{coach.certifications[0].title}</span>
+          ) : (
+            <div className="text-[11px] text-slate-500 italic p-2 bg-slate-50 rounded-xl border border-slate-100">
+              Đang hoàn thiện chứng chỉ bổ sung
             </div>
-          </div>
-        )}
-
-        {/* Specialties Tags */}
-        <div className="flex flex-wrap gap-1 mb-4">
-          {coach.specialties.slice(0, 3).map((spec, i) => (
-            <span 
-              key={i} 
-              className="text-[11px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded-md font-medium"
-            >
-              {spec}
-            </span>
-          ))}
-          {coach.specialties.length > 3 && (
-            <span className="text-[11px] text-gray-400 px-1 py-0.5">
-              +{coach.specialties.length - 3}
-            </span>
           )}
+
+          {/* Key Skill Badges */}
+          <div className="flex flex-wrap gap-1.5 pt-0.5">
+            {coach.specialties.slice(0, 3).map((spec, i) => (
+              <span 
+                key={i} 
+                className="text-[11px] bg-slate-100 text-slate-700 font-semibold px-2.5 py-1 rounded-lg border border-slate-200/60"
+              >
+                {spec}
+              </span>
+            ))}
+            {coach.specialties.length > 3 && (
+              <span className="text-[10px] bg-slate-50 text-slate-500 font-medium px-2 py-1 rounded-lg">
+                +{coach.specialties.length - 3}
+              </span>
+            )}
+          </div>
+
+          {/* Location & Soonest Slot */}
+          <div className="space-y-1 pt-1 text-xs text-slate-600">
+            <div className="flex items-center gap-1.5 truncate">
+              <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span className="truncate font-medium">{coach.area}</span>
+            </div>
+            
+            {soonestSlot && (
+              <div className="flex items-center gap-1.5 text-emerald-700 font-bold text-[11px]">
+                <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Lịch sớm nhất: {soonestSlot.date} ({soonestSlot.start_time} - {soonestSlot.end_time})</span>
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
 
-      {/* Footer Price & Booking CTA */}
-      <div className="p-5 pt-3 bg-gray-50/80 border-t border-gray-100 flex items-center justify-between gap-3">
+      {/* 4. LEVEL 5 (PRICE) & LEVEL 6 (ACTION) */}
+      <div className="p-5 pt-3.5 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between gap-3">
         <div>
-          <div className="text-[11px] text-gray-400">Học phí từ</div>
+          <div className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Học phí đào tạo</div>
           <div className="flex items-baseline gap-1">
-            <span className="text-lg font-black text-gray-900">
-              {coach.price_per_session.toLocaleString('vi-VN')}đ
+            <span className="text-base sm:text-lg font-black text-slate-900">
+              {coach.price_per_session.toLocaleString('vi-VN')} đ
             </span>
-            <span className="text-xs text-gray-500 font-normal">/buổi</span>
+            <span className="text-xs text-slate-500 font-normal">/ buổi</span>
           </div>
-          {lowestPackage && lowestPackage.discount_percent > 0 && (
-            <div className="text-[10px] text-emerald-600 font-semibold">
-              Gói {lowestPackage.sessions} buổi: Giảm {lowestPackage.discount_percent}%
-            </div>
-          )}
         </div>
 
+        {/* Primary Action Button */}
         <button
+          type="button"
+          id={`btn-book-coach-${coach.id}`}
           onClick={() => onSelectCoach(coach)}
-          className="bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition duration-150 flex items-center gap-1.5 shadow-sm shadow-emerald-600/30 cursor-pointer"
+          className="bg-emerald-700 hover:bg-emerald-800 active:scale-98 text-white text-xs sm:text-sm font-bold px-4 sm:px-5 py-2.5 rounded-xl transition duration-150 flex items-center gap-1.5 shadow-md shadow-emerald-700/20 cursor-pointer"
         >
-          <Calendar className="w-3.5 h-3.5" />
-          <span>Đặt lịch học</span>
-          <ChevronRight className="w-3.5 h-3.5" />
+          <Calendar className="w-4 h-4 text-emerald-200" />
+          <span>Đặt Lịch Học</span>
+          <ChevronRight className="w-4 h-4 text-emerald-200" />
         </button>
       </div>
+
     </div>
   );
 };
